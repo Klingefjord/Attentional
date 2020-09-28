@@ -7,12 +7,13 @@ let extractTextContent = document.getElementById('extractTextContent');
 //   extractTextContent.setAttribute('value', data.color);
 // });
 
-extractTextContent.onclick = function(element) {
-    let color = element.target.value;
-    chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-        console.log("It a worked!")
-      chrome.tabs.executeScript(
-          tabs[0].id,
-          {file: "./js/contentScript.js"}); // THIS IS A CONTENT SCRIPT
+extractTextContent.onclick = (element) => {
+    chrome.tabs.query({active: true, currentWindow: true}, tabs => {
+        chrome.tabs.executeScript(
+            tabs[0].id,
+            { 
+                file: "./js/contentScript.js" 
+            }
+        );
     });
   };
