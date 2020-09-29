@@ -1,5 +1,18 @@
-// This should definitely be done by an ML model eventually. But for the initial prototype, let's roll with some brittle manual logic
 (function() {
+    textNodes = tagText()
+    filterTextNodes(textNodes)
+})()
+
+function filterTextNodes(textNodes) {
+    // PLACEHOLDER for ML model, filter out any string with digits
+    for (let i = 0; i < textNodes.length; i++) {
+        const node = textNodes[i]
+        if (/[0-9]/.test(node.textContent)) node.style.display = "none"
+    }
+}
+
+function tagText() {
+    // This should definitely be done by an ML model eventually. But for the initial prototype, let's roll with some brittle manual logic
     const lengthThreshold = 10
     const containerTags = ["DIV", "BUTTON", "UL", "OL", "NAV"]
 
@@ -21,4 +34,6 @@
     for (let i = 0; i < textNodes.length; i++) {
         textNodes[i].classList.add(`$attentional_filter_candidate_${i}$`)
     }
-})()
+
+    return textNodes
+}

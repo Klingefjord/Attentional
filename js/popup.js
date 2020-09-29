@@ -12,7 +12,7 @@ extractTextContent.onclick = (element) => {
         chrome.tabs.executeScript(
             tabs[0].id,
             { 
-                file: "./js/extractText.js" 
+                file: "./js/main.js" 
             }
         );
     });
