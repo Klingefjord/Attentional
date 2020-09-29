@@ -31,9 +31,11 @@ function tagText() {
     
     textNodes = getTextNodes(document.getRootNode())
 
+    text = [] // Todo remove
     for (let i = 0; i < textNodes.length; i++) {
         textNodes[i].classList.add(`$attentional_filter_candidate_${i}$`)
+        text.push(textNodes[i].innerText)     // Todo remove
     }
-
+    console.log(text) // todo remove
     return textNodes
 }
