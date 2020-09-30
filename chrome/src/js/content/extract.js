@@ -1,9 +1,12 @@
+const { BASE_URL } = require("../../../utils/env")
+
 (function() {
-    textNodes = tagText()
-    filterTextNodes(textNodes)
+    taggedText = tagText()
+    filterTextNodes(taggedText)
 })()
 
-function filterTextNodes(textNodes) {
+function filterTextNodes(taggedText) {
+    //fetch(`${BASE_URL}/classify`)
     // PLACEHOLDER for ML model, filter out any string with digits
     for (let i = 0; i < textNodes.length; i++) {
         const node = textNodes[i]
@@ -31,11 +34,12 @@ function tagText() {
     
     textNodes = getTextNodes(document.getRootNode())
 
-    text = [] // Todo remove
+    dict = {}
     for (let i = 0; i < textNodes.length; i++) {
+        const id = "$attentional_filter_candidate_${i}$"
         textNodes[i].classList.add(`$attentional_filter_candidate_${i}$`)
-        text.push(textNodes[i].innerText)     // Todo remove
+        dict.id = textNodes[i].innerText
     }
     console.log(text) // todo remove
-    return textNodes
+    return dict
 }
