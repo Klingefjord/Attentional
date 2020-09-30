@@ -1,2 +1,6 @@
 .DS_Store
 /backend/env/
+/chrome/node_modules
+/chrome/build
+/chrome/secrets.*.js
+
