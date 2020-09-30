@@ -28,6 +28,7 @@ def classify():
         scores = preds['scores']
         labels = preds['labels']
         assert len(scores) == len(labels)
+        if (max(scores)) < threshold: continue # only return labels that passed the threshold
         pred_label = labels[scores.index(max(scores))]
         response[key] = pred_label
 

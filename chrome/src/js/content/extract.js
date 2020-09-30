@@ -1,20 +1,31 @@
-const { BASE_URL } = require("../../../utils/env")
+import { BASE_URL } from "../../../utils/env"
+import { LABELS } from '../constants.js'
 
 (function() {
-    taggedText = tagText()
-    filterTextNodes(taggedText)
+    let sequences = getSequences()
+    filterTextNodes(sequences)
 })()
 
-function filterTextNodes(taggedText) {
-    //fetch(`${BASE_URL}/classify`)
-    // PLACEHOLDER for ML model, filter out any string with digits
-    for (let i = 0; i < textNodes.length; i++) {
-        const node = textNodes[i]
-        if (/[0-9]/.test(node.textContent)) node.style.display = "none"
-    }
+function filterTextNodes(sequences) {
+    alert("ho!")
+    console.log("Inside filter text nodes")
+    chrome.storage.local.get(LABELS, labels => {
+        if (!Array.isArray(labels)) alert("You need to add one or more labels first")
+        console.log("got labels: ", labels)
+        fetch(`${BASE_URL}/classify`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({"sequences": sequences, "labels": labels})
+        }).then(response => {
+            console.log("got response: ", response)
+            for (const key in response) {
+                document.getElementsByClassName(key)[0].style.display = "none"
+            }
+        })
+    })
 }
 
-function tagText() {
+function getSequences() {
     // This should definitely be done by an ML model eventually. But for the initial prototype, let's roll with some brittle manual logic
     const lengthThreshold = 10
     const containerTags = ["DIV", "BUTTON", "UL", "OL", "NAV"]
@@ -32,14 +43,14 @@ function tagText() {
         return list;
     }
     
-    textNodes = getTextNodes(document.getRootNode())
+    const textNodes = getTextNodes(document.getRootNode())
+    let dict = {}
 
-    dict = {}
     for (let i = 0; i < textNodes.length; i++) {
         const id = "$attentional_filter_candidate_${i}$"
         textNodes[i].classList.add(`$attentional_filter_candidate_${i}$`)
         dict.id = textNodes[i].innerText
     }
-    console.log(text) // todo remove
+    console.log(dict) // todo remove
     return dict
 }
