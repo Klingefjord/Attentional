@@ -1,5 +1,5 @@
 import { BASE_URL } from "../../../utils/env"
-import { LABELS } from '../constants.js'
+import { LABELS, MAX_SEQUENCE_COUNT } from '../constants.js'
 
 (function() {
     let sequences = getSequences()
@@ -7,18 +7,17 @@ import { LABELS } from '../constants.js'
 })()
 
 function filterTextNodes(sequences) {
-    alert("ho!")
-    console.log("Inside filter text nodes")
-    chrome.storage.local.get(LABELS, labels => {
+    chrome.storage.sync.get([LABELS], labelObj => {
+        let labels = labelObj.labels
         if (!Array.isArray(labels)) alert("You need to add one or more labels first")
-        console.log("got labels: ", labels)
         fetch(`${BASE_URL}/classify`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
             body: JSON.stringify({"sequences": sequences, "labels": labels})
-        }).then(response => {
-            console.log("got response: ", response)
-            for (const key in response) {
+        })
+        .then(response => response.json())
+        .then(responseBody => {
+            for (const key in responseBody) {
                 document.getElementsByClassName(key)[0].style.display = "none"
             }
         })
@@ -28,7 +27,7 @@ function filterTextNodes(sequences) {
 function getSequences() {
     // This should definitely be done by an ML model eventually. But for the initial prototype, let's roll with some brittle manual logic
     const lengthThreshold = 10
-    const containerTags = ["DIV", "BUTTON", "UL", "OL", "NAV"]
+    const containerTags = ["DIV", "BUTTON", "UL", "OL", "NAV", "SECTION"]
 
     const filter = node => {
         const isContainer = containerTags.some(t => t === node.tagName)
@@ -43,14 +42,23 @@ function getSequences() {
         return list;
     }
     
-    const textNodes = getTextNodes(document.getRootNode())
+
+    let textNodes = Array.from(getTextNodes(document.getRootNode()))
+    console.log(textNodes)
+    textNodes.sort((a,b) => b.innerText.length - a.innerText.length)
     let dict = {}
 
-    for (let i = 0; i < textNodes.length; i++) {
-        const id = "$attentional_filter_candidate_${i}$"
-        textNodes[i].classList.add(`$attentional_filter_candidate_${i}$`)
-        dict.id = textNodes[i].innerText
+    for (let i = 0; i < Math.min(textNodes.length, MAX_SEQUENCE_COUNT); i++) {
+        const id = `$attentional_filter_candidate_${i}$`
+        textNodes[i].classList.add(id)
+        dict[id] = cleanText(textNodes[i].innerText)
     }
     console.log(dict) // todo remove
     return dict
+}
+
+function cleanText(text) {
+    return text
+        .replace(/\s\s+/g, ' ')
+        .replace('↵', '')
 }

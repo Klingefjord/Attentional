@@ -8,21 +8,33 @@ let form = document.getElementById('label-form');
 
 let updateLabelList = labels => {
     if (!Array.isArray(labels)) return
+    labelList.innerHTML = ""
     labels.forEach(l => {
         let li = document.createElement("li")
+        li.addEventListener('click', _ => removeElement(l))
         li.appendChild(document.createTextNode(l))
         labelList.appendChild(li)
     })
 }
 
+let removeElement = label => {
+    chrome.storage.sync.get([LABELS], labelObj => {
+        if (labelObj.labels) {
+            let labels = labelObj.labels
+            const index = labels.indexOf(label);
+            if (index > -1) labels.splice(index, 1);
+            chrome.storage.sync.set({[LABELS]: labels}, () => updateLabelList(labels))
+        }
+    })
+}
+
 form.addEventListener('submit', event => {
     event.preventDefault()
-    chrome.storage.local.get(LABELS, labels => {
+    chrome.storage.sync.get([LABELS], labelObj => {
         let list = []
-        if (Array.isArray(labels) && labels.length >= 1) list.concat(labels)
+        if (labelObj.labels && Array.isArray(labelObj.labels)) list = list.concat(labelObj.labels)
         list.push(labelInput.value)
-        console.log(list)
-        chrome.storage.local.set({LABELS: list}, () => updateLabelList(list))
+        chrome.storage.sync.set({[LABELS]: list}, () => updateLabelList(list))
         labelInput.value = ""
     })
 })
@@ -33,4 +45,4 @@ extractTextContent.onclick = event => {
     )
 }
 
-chrome.storage.local.get(LABELS, updateLabelList)
+chrome.storage.sync.get([LABELS], labelObj => updateLabelList(labelObj.labels))
