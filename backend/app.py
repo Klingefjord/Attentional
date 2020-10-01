@@ -2,6 +2,8 @@ from flask import Flask, request, jsonify
 from transformers import pipeline
 import time
 
+threshold = 0.7
+
 app = Flask(__name__)
 classifier = pipeline("zero-shot-classification")
 
