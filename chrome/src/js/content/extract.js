@@ -7,98 +7,13 @@ import {
 } from "../constants.js";
 
 (function () {
-  let sequences = getSequencesRecursive();
-  filterTextNodes(sequences);
+  const nodes = findMaximumNumberOfTextNodes();
+  api(mapTextToId(nodes)).then(responseBody => {
+    for (const key in responseBody) document.getElementsByClassName(key)[0].style.display = "none";
+  })
 })();
 
-function filterTextNodes(sequences) {
-  chrome.storage.sync.get([LABELS], (labelObj) => {
-    let labels = labelObj.labels;
-    if (!Array.isArray(labels))
-      alert("You need to add one or more labels first");
-    fetch(`${BASE_URL}/classify`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Access-Control-Allow-Origin": "*",
-        },
-        body: JSON.stringify({
-          sequences: sequences,
-          labels: labels
-        }),
-      })
-      .then((response) => response.json())
-      .then((responseBody) => {
-        for (const key in responseBody) {
-          let i = 0;
-          document.getElementsByClassName(key)[0].style.display = "none";
-        }
-      });
-  });
-}
-
-function getSequencesRecursive() {
-  // This should definitely be done by an ML model eventually. But for the initial prototype, let's roll with some brittle manual logic
-  const containerTags = [
-    "DIV",
-    "BUTTON",
-    "UL",
-    "OL",
-    "NAV",
-    "SECTION",
-    "HEADER",
-    "FOOTER",
-  ];
-  const lengthThreshold = 10;
-
-  const childNodeFilter = (node) => {
-    const isContainer = containerTags.some((t) => t === node.tagName);
-    // This maybe should be recursive.
-    const hasContainerChildren = Array.from(node.childNodes).some((cn) =>
-      containerTags.some((ct) => ct === cn.nodeName)
-    );
-    return isContainer && hasContainerChildren;
-  };
-
-  let nodes = [...document.getElementsByTagName("body")]
-  let keepIterating = true;
-
-  let c = 0;
-  while (keepIterating) {
-    console.log("In while iteration ", c++, " textNodes is ", nodes);
-
-    nodes.sort((a, b) => (!a.childNodes || !b.childNodes) ? 0 : b.childNodes.length - a.childNodes.length)
-    let updateCountThisIteration = 0;
-    for (let i = nodes.length - 1; i >= 0; i--) {
-      if (!nodes[i].hasChildNodes()) {
-        if (
-          !nodes[i].textContent ||
-          nodes[i].textContent.length < lengthThreshold
-        ) {
-          nodes.splice(i, 1);
-        }
-        continue;
-      }
-
-      const childNodes = Array.from(nodes[i].childNodes).filter(childNodeFilter);
-      const remainingSlots = MAX_SEQUENCE_COUNT - nodes.length;
-
-      if (childNodes.length > 0 && remainingSlots > childNodes.length) {
-        //  console.log("Updating!!!!");
-        nodes.splice(i, 1);
-        nodes = nodes.concat(childNodes);
-        updateCountThisIteration++;
-      }
-    }
-
-    if (
-      nodes.length >= MAX_SEQUENCE_COUNT ||
-      updateCountThisIteration === 0
-    ) {
-      keepIterating = false;
-    }
-  }
-
+function mapTextToId(nodes) {
   let dict = {};
 
   for (let i = 0; i < Math.min(nodes.length, MAX_SEQUENCE_COUNT); i++) {
@@ -114,9 +29,81 @@ function getSequencesRecursive() {
     nodes[i].classList.add(tag);
   }
 
+  console.log(dict)
   return dict;
 }
 
+function api(sequences) {
+  chrome.storage.sync.get([LABELS], (labelObj) => {
+    let labels = labelObj.labels;
+    if (!Array.isArray(labels))
+      alert("You need to add one or more labels first");
+    fetch(`${BASE_URL}/classify`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "*",
+        },
+        body: JSON.stringify({
+          sequences: sequences,
+          labels: labels
+        }),
+      })
+      .then((response) => response.json());
+  });
+}
+
+function findMaximumNumberOfTextNodes() {
+  // This should definitely be done by an ML model eventually. But for the initial prototype, let's roll with some brittle manual logic
+  const containerTags = [
+    "DIV",
+    "BUTTON",
+    "UL",
+    "OL",
+    "NAV",
+    "SECTION",
+    "HEADER",
+    "FOOTER",
+    "MAIN"
+  ];
+  const lengthThreshold = 10;
+
+  const isContainer = node => containerTags.some(t => t === node.nodeName);
+  const hasInnerText = node => node.innerText && node.innerText.length >= lengthThreshold
+
+  let nodes = [...document.getElementsByTagName("body")]
+  let keepIterating = true;
+
+  let bestRun = []
+  while (keepIterating) {
+    // console.log("In while iteration ", c++, " nodes is ", nodes, ". Amount of nodes with text content is ", nodes.reduce((acc, curr) => {
+    //   if (curr.innerText && curr.innerText.length > lengthThreshold) ++acc
+    //   return acc
+    // }, 0));
+
+    const childNodes = nodes
+      .filter(n => n.hasChildNodes)
+      .reduce((acc, n) => acc.concat(Array.from(n.childNodes)), [])
+      .filter(isContainer)
+      .filter(hasInnerText)
+
+    if (childNodes.length < MAX_SEQUENCE_COUNT && childNodes.length != 0) {
+      if (childNodes.length >= bestRun.length) bestRun = childNodes
+    } else {
+      keepIterating = false
+    }
+  }
+
+  return bestRun
+}
+
+function cleanText(text) {
+  return text.replace(/\s\s+/g, " ").replace("↵", "").toLowerCase();
+}
+
+/**
+ * DEPRECATED
+ */
 function getSequences() {
   // This should definitely be done by an ML model eventually. But for the initial prototype, let's roll with some brittle manual logic
   const lengthThreshold = 10;
@@ -148,7 +135,6 @@ function getSequences() {
   };
 
   let textNodes = Array.from(getTextNodes(document.getRootNode()));
-  console.log(textNodes);
   textNodes.sort((a, b) => b.innerText.length - a.innerText.length);
   let dict = {};
 
@@ -159,8 +145,4 @@ function getSequences() {
   }
   console.log(dict); // todo remove
   return dict;
-}
-
-function cleanText(text) {
-  return text.replace(/\s\s+/g, " ").replace("↵", "").toLowerCase();
 }

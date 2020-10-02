@@ -1,11 +1,11 @@
 from flask import Flask, request, jsonify
-#from transformers import pipeline
+from transformers import pipeline
 import time
 
-threshold = 0.7
+threshold = 0.8
 
 app = Flask(__name__)
-#classifier = pipeline("zero-shot-classification")
+classifier = pipeline("zero-shot-classification")
 
 @app.route('/')
 def hello():
