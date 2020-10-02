@@ -1,2 +1,2 @@
 export const LABELS = "labels"
-export const MAX_SEQUENCE_COUNT = 10
+export const MAX_SEQUENCE_COUNT = 200

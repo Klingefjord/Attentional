@@ -1,11 +1,11 @@
 from flask import Flask, request, jsonify
-from transformers import pipeline
+#from transformers import pipeline
 import time
 
 threshold = 0.7
 
 app = Flask(__name__)
-classifier = pipeline("zero-shot-classification")
+#classifier = pipeline("zero-shot-classification")
 
 @app.route('/')
 def hello():
@@ -38,4 +38,4 @@ def classify():
     return jsonify(response)
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, threaded=True)
