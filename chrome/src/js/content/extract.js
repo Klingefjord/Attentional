@@ -3,23 +3,34 @@ import {
 } from "../../../utils/env";
 import {
   LABELS,
-  MAX_SEQUENCE_COUNT
+  MAX_SEQUENCE_COUNT,
+  MIN_TEXT_LENGTH,
+  MAX_TEXT_LENGTH
 } from "../constants.js";
 
 (function () {
-  const nodes = findMaximumNumberOfTextNodes();
-  api(mapTextToId(nodes)).then(responseBody => {
-    for (const key in responseBody) document.getElementsByClassName(key)[0].style.display = "none";
-  })
-})();
+  const nodes = findMaximumNumberOfTextNodes()
+  console.log(nodes)
+  const dict = mapTextToId(nodes)
+  console.log(dict)
+  // Doing this sequentially to speed up ML process
+  for (let [key, value] of Object.entries(dict)) {
+    let temp = {}
+    temp[key] = value
+    api(temp, responseBody => {
+      for (const key in responseBody) document.getElementsByClassName(key)[0].style.display = "none";
+    })
+  }
+})()
 
 function mapTextToId(nodes) {
+  console.log("inside map text to id")
   let dict = {};
 
   for (let i = 0; i < Math.min(nodes.length, MAX_SEQUENCE_COUNT); i++) {
     const cleanedText = cleanText(nodes[i].innerText)
     const tag = `$attentional_filter_candidate_${i}$`
-    if (cleanedText.length <= lengthThreshold) {
+    if (cleanedText.length <= MIN_TEXT_LENGTH || cleanedText.length >= MAX_TEXT_LENGTH) {
       continue
     } else if (!Object.keys(dict).some(k => dict[k] === cleanedText)) {
       // Only add to dict if no dupes of the text already exists
@@ -33,8 +44,8 @@ function mapTextToId(nodes) {
   return dict;
 }
 
-function api(sequences) {
-  chrome.storage.sync.get([LABELS], (labelObj) => {
+function api(sequences, handler) {
+  return chrome.storage.sync.get([LABELS], (labelObj) => {
     let labels = labelObj.labels;
     if (!Array.isArray(labels))
       alert("You need to add one or more labels first");
@@ -49,7 +60,8 @@ function api(sequences) {
           labels: labels
         }),
       })
-      .then((response) => response.json());
+      .then((response) => response.json())
+      .then(responseBody => handler(responseBody));
   });
 }
 
@@ -57,38 +69,38 @@ function findMaximumNumberOfTextNodes() {
   // This should definitely be done by an ML model eventually. But for the initial prototype, let's roll with some brittle manual logic
   const containerTags = [
     "DIV",
-    "BUTTON",
-    "UL",
-    "OL",
     "NAV",
     "SECTION",
     "HEADER",
     "FOOTER",
     "MAIN"
   ];
-  const lengthThreshold = 10;
 
   const isContainer = node => containerTags.some(t => t === node.nodeName);
-  const hasInnerText = node => node.innerText && node.innerText.length >= lengthThreshold
+  const hasInnerText = node => node.innerText && node.innerText.length >= MIN_TEXT_LENGTH
 
   let nodes = [...document.getElementsByTagName("body")]
   let keepIterating = true;
 
   let bestRun = []
+  let c = 0
   while (keepIterating) {
-    // console.log("In while iteration ", c++, " nodes is ", nodes, ". Amount of nodes with text content is ", nodes.reduce((acc, curr) => {
-    //   if (curr.innerText && curr.innerText.length > lengthThreshold) ++acc
-    //   return acc
-    // }, 0));
+    console.log("In while iteration ", c++, " nodes is ", nodes, ". Amount of nodes with text content is ", nodes.reduce((acc, curr) => {
+      if (curr.innerText && curr.innerText.length > MIN_TEXT_LENGTH) ++acc
+      return acc
+    }, 0));
 
-    const childNodes = nodes
+    // get all nodes that have child nodes, get their child nodes and check that they are indeed containers and have text.
+    const newNodes = nodes
       .filter(n => n.hasChildNodes)
       .reduce((acc, n) => acc.concat(Array.from(n.childNodes)), [])
       .filter(isContainer)
       .filter(hasInnerText)
+      .concat(nodes.filter(n => !n.hasChildNodes))
 
-    if (childNodes.length < MAX_SEQUENCE_COUNT && childNodes.length != 0) {
-      if (childNodes.length >= bestRun.length) bestRun = childNodes
+    if (newNodes.length < MAX_SEQUENCE_COUNT && newNodes.length != 0) {
+      if (newNodes.length > bestRun.length) bestRun = newNodes
+      nodes = newNodes
     } else {
       keepIterating = false
     }
@@ -106,7 +118,6 @@ function cleanText(text) {
  */
 function getSequences() {
   // This should definitely be done by an ML model eventually. But for the initial prototype, let's roll with some brittle manual logic
-  const lengthThreshold = 10;
   const containerTags = ["DIV", "BUTTON", "UL", "OL", "NAV", "SECTION"];
 
   const filter = (node) => {
@@ -130,7 +141,7 @@ function getSequences() {
         false
       );
     while ((node = walk.nextNode()))
-      if (node.textContent.length >= lengthThreshold) list.push(node);
+      if (node.textContent.length >= MIN_TEXT_LENGTH) list.push(node);
     return list;
   };
 
