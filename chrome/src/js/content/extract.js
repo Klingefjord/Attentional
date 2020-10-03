@@ -4,12 +4,12 @@ import {
 import {
   LABELS,
   MAX_SEQUENCE_COUNT,
+  MAX_TEXT_LENGTH,
   MIN_TEXT_LENGTH,
-  MAX_TEXT_LENGTH
 } from "../constants.js";
 
 (function () {
-  const nodes = findMaximumNumberOfTextNodes()
+  const nodes = findTextParentsEqualToMax()
   console.log(nodes)
   const dict = mapTextToId(nodes)
   console.log(dict)
@@ -107,6 +107,40 @@ function findMaximumNumberOfTextNodes() {
   }
 
   return bestRun
+}
+
+function findTextParentsEqualToMax() {
+  const getTextNodes = element => {
+    let node,
+      list = [],
+      walk = document.createTreeWalker(
+        element,
+        NodeFilter.SHOW_TEXT,
+        null,
+        false
+      );
+    while ((node = walk.nextNode())) {
+      if (node.parentElement && node.parentElement.children.length === 0) list.push(node)
+    }
+    return list;
+  };
+
+  let nodes = Array.from(getTextNodes(document.getElementsByTagName("body")[0]));
+
+  let c = 0
+  while (nodes.length >= MAX_SEQUENCE_COUNT) {
+    c = c++
+    nodes = nodes
+      .filter(n => n.parentNode)
+      .map(n => n.parentNode)
+      .filter(n => !["SCRIPT", "NOSCRIPT"].some(ntn => ntn === n.nodeName))
+    //console.log(c, ", Nodes after initial filtering: ", nodes)
+    nodes = nodes.filter(n1 => !nodes.some(n2 => n1.contains(n2) && n2 !== n1))
+    //console.log(c, ", Nodes after second filtering: ", nodes)
+    nodes = [...new Set(nodes)]
+  }
+
+  return nodes
 }
 
 function cleanText(text) {
