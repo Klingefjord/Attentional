@@ -2,8 +2,8 @@ export function cleanText(str) {
     return str.replace(/\s\s+/g, " ").replace("↵", " ").toLowerCase();
 }
 
-export function isValidStr(str) {
-    return str && /[a-zA-Z]/.test(str)
+export function isValidStr(str, minLength) {
+    return str && /[a-zA-Z]/.test(str) && str.replace(/\s\s+/g, " ").length >= minLength
 }
 
 export function chunkString(str, len) {

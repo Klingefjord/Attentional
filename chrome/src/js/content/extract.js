@@ -14,12 +14,12 @@ import {
 } from "../utils.js"
 
 (function () {
-  const nodes = getTextNodesUntilLimit(MAX_SEQUENCE_COUNT)
+  const nodes = getNodes(MAX_SEQUENCE_COUNT, MIN_TEXT_LENGTH)
+  const dict = mapTextToId(nodes, MAX_TEXT_LENGTH)
   console.log(nodes)
-  nodes.map(node => console.log(cleanText(node.innerText ? node.innerText : node.textContent)))
-  const dict = mapTextToId(nodes)
+  console.log(dict)
 
-  // Doing this sequentially to speed up ML process
+  // Doing this sequentially for now
   for (let [key, value] of Object.entries(dict)) {
     let temp = {}
     temp[key] = value
@@ -29,18 +29,16 @@ import {
   }
 })()
 
-function mapTextToId(nodes) {
+function mapTextToId(nodes, maxTextLength) {
   let dict = {};
 
   for (let i = 0; i < nodes.length; i++) {
     const cleanedText = cleanText(nodes[i].innerText ? nodes[i].innerText : nodes[i].textContent) // textNodes has no .innerText attribute, but do have a .textContent attribute
     const tag = `$attentional_filter_candidate_${i}$`
 
-    if (cleanedText.length < MIN_TEXT_LENGTH) {
-      continue
-    } else if (!Object.keys(dict).some(k => dict[k].length === 1 && dict[k][0] === cleanedText)) {
+    if (!Object.keys(dict).some(k => dict[k].length === 1 && dict[k][0] === cleanedText)) {
       // Only add to dict if no dupes of the text already exists.
-      dict[tag] = chunkString(cleanedText, MAX_TEXT_LENGTH)
+      dict[tag] = chunkString(cleanedText, maxTextLength)
     }
 
     nodes[i].classList.add(tag);
@@ -74,35 +72,43 @@ function api(sequences, handler) {
  * Algorithm for finding text nodes
  *    
  * From the body tag, recursively sorts tags on text content length and replaces all tags
- * with their children until @param maxAllowedNodeCount limit is reached
+ * with their children until @param allowedNodeCount limit is reached
  */
-function getTextNodesUntilLimit(maxAllowedNodeCount) {
+function getNodes(allowedNodeCount, minTextLength) {
   const INVALID_TAG_NAMES = ["SCRIPT", "NOSCRIPT", "HTML"]
-  const validChildren = node => {
+
+  const getRelevantChildren = node => {
     const validChildren = node.children ? [...(node.children)]
-      .filter(c => isValidStr(c.innerText))
+      .filter(c => isValidStr(c.innerText, minTextLength))
       .filter(c => !INVALID_TAG_NAMES.some(tag => tag == c.nodeName)) : []
     return validChildren
   }
 
-  let nodes = validChildren(document.getElementsByTagName("body")[0])
-  let withinBounds = true
-  while (withinBounds) {
+  let nodes = getRelevantChildren(document.getElementsByTagName("body")[0])
+  let withinAllowedNodeCount = true
+
+  while (withinAllowedNodeCount) {
     // sort nodes in reverse order
     nodes = nodes.sort((a, b) => a.innerText && b.innerText ? b.innerText.length - a.innerText.length : 0)
+
+    // keep track of changes made, in case we are never able to fill up the allowedNodeCount
+    let changesMadeThisIteration = false
 
     // loop through nodes in reverse order
     // as long as we're not past the limit, replace each node with its children
     for (let i = nodes.length - 1; i >= 0; i--) {
-      const nodeReplacements = validChildren(nodes[i])
-      if (nodes.length + nodeReplacements.length - 1 > maxAllowedNodeCount) {
+      const childReplacements = getRelevantChildren(nodes[i])
+      
+      if (nodes.length + childReplacements.length - 1 > allowedNodeCount) {
         withinBounds = false
         break
-      } else if (nodeReplacements.length > 0) {
+      } else if (childReplacements.length > 0) {
         nodes.splice(i, 1)
-        nodes = nodes.concat(nodeReplacements)
+        nodes = nodes.concat(childReplacements)
+        changesMadeThisIteration = true
       }
     }
+    if (!changesMadeThisIteration) break
   }
 
   return nodes
