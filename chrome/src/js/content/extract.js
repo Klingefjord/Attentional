@@ -23,7 +23,9 @@ import {
   for (let [key, value] of Object.entries(dict)) {
     let temp = {}
     temp[key] = value
+
     api(temp, responseBody => {
+      for (const key in responseBody) console.log("Supposed to hide element with key ", temp[key])
       for (const key in responseBody) document.getElementsByClassName(key)[0].style.display = "none";
     })
   }

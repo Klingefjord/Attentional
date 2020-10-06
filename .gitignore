@@ -3,4 +3,5 @@
 /chrome/node_modules
 /chrome/build
 /chrome/secrets.*.js
-
+/backend/.vscode/
+/backend/__pycache__/

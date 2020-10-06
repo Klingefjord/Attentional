@@ -1,5 +1,6 @@
 from flask import Flask, request, jsonify
 from transformers import pipeline
+import numpy as np
 import time
 
 threshold = 0.6
@@ -23,19 +24,24 @@ def classify():
     response = {}
 
     start_time = time.time()
-    for key, sequence in sequences.items():
-        preds = classifier(sequence, labels)
-        scores = preds['scores']
-        labels = preds['labels']
-        print(f"key: ", key)
-        print(f"Sequence: ", sequence[0:100])
-        print(f"Labels: ", labels)
-        print(f"Scores: ", scores)
+    for key, sequence_chunks in sequences.items():
+        preds = np.zeros((len(sequence_chunks), len(labels)))
+        for chunk_idx, chunk in enumerate(sequence_chunks):
+            y = classifier(chunk, labels)
+            preds[chunk_idx] = y['scores']
+
+        scores = preds.mean(0).squeeze().tolist() # average the rows
+        if (isinstance(scores, float)): scores = [scores] # numpy squeezes 1d arrays into scalars...
         assert len(scores) == len(labels)
+        print("==============")
+        print(f"key: ", key)
+        print(f"sequence: ”{sequence_chunks[0][0:20]} [...]”")
+        print(f"labels: ", labels)
+        print(f"Scores: ", scores)
+        print("==============")
         if (max(scores)) < threshold: continue # only return labels that passed the threshold
         pred_label = labels[scores.index(max(scores))]
         response[key] = pred_label
-
     
     print(f"Classified request with {len(sequences)} sequences. Took {time.time() - start_time} seconds")
     print(response)
