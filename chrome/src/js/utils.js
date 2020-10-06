@@ -6,7 +6,10 @@ export function isValidStr(str, minLength) {
     return str && /[a-zA-Z]/.test(str) && str.replace(/\s\s+/g, " ").length >= minLength
 }
 
-export function chunkString(str, len) {
+/**
+ * Returns an array of @param len - sized chunks from @param str
+ */
+export function chunkify(str, len) {
     const size = Math.ceil(str.length / len)
     const r = Array(size)
     let offset = 0
@@ -17,4 +20,16 @@ export function chunkString(str, len) {
     }
 
     return r
+}
+
+export function unixTimestamp() {
+    return Math.round(new Date().getTime())
+}
+
+export function hashCode(str) {
+    let h;
+    for(let i = 0; i < str.length; i++) 
+          h = Math.imul(31, h) + str.charCodeAt(i) | 0;
+
+    return h;
 }

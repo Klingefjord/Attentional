@@ -3,7 +3,14 @@
 	"version": "0.1",    
 	"description": "Control your attention",    
 	"manifest_version": 2,
-	"permissions": ["activeTab", "declarativeContent", "storage"],
+	"permissions": [
+    "activeTab", 
+    "declarativeContent", 
+    "storage", 
+    "webNavigation",
+    "tabs",
+    "http://*/",
+    "https://*/"],
 	"options_page": "options.html",
 	"background": {  
     "page": "background.html"
