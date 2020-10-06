@@ -1,15 +1,22 @@
 import {
   BASE_URL
-} from "../../../utils/env";
+} from "../../../utils/env"
 import {
   LABELS,
   MAX_SEQUENCE_COUNT,
   MAX_TEXT_LENGTH,
   MIN_TEXT_LENGTH,
-} from "../constants.js";
+} from "../constants.js"
+import {
+  chunkString,
+  isValidStr,
+  cleanText
+} from "../utils.js"
 
 (function () {
-  const nodes = textNodesSplitOnGranularity(MAX_SEQUENCE_COUNT)
+  const nodes = getTextNodesUntilLimit(MAX_SEQUENCE_COUNT)
+  console.log(nodes)
+  nodes.map(node => console.log(cleanText(node.innerText ? node.innerText : node.textContent)))
   const dict = mapTextToId(nodes)
 
   // Doing this sequentially to speed up ML process
@@ -66,92 +73,37 @@ function api(sequences, handler) {
 /**
  * Algorithm for finding text nodes
  *    
- * Extract all text nodes in the body
- * Recursively replace the nodes with their parents until reaching limit @param maxAllowedNodeCount
- *  Remove nodes which have reached the html, body or document level
- *  Replace parent p with all the siblings to a node n if parent p contains node n
- *  Remove duplicates
+ * From the body tag, recursively sorts tags on text content length and replaces all tags
+ * with their children until @param maxAllowedNodeCount limit is reached
  */
-function textNodesSplitOnGranularity(maxAllowedNodeCount) {
-  const start = new Date()
+function getTextNodesUntilLimit(maxAllowedNodeCount) {
+  const INVALID_TAG_NAMES = ["SCRIPT", "NOSCRIPT", "HTML"]
+  const validChildren = node => {
+    const validChildren = node.children ? [...(node.children)]
+      .filter(c => isValidStr(c.innerText))
+      .filter(c => !INVALID_TAG_NAMES.some(tag => tag == c.nodeName)) : []
+    return validChildren
+  }
 
-  const ignoreableTags = ["SCRIPT", "NOSCRIPT", "HTML", "BODY"]
+  let nodes = validChildren(document.getElementsByTagName("body")[0])
+  let withinBounds = true
+  while (withinBounds) {
+    // sort nodes in reverse order
+    nodes = nodes.sort((a, b) => a.innerText && b.innerText ? b.innerText.length - a.innerText.length : 0)
 
-  const getTextNodes = element => {
-    let node,
-      list = [],
-      walk = document.createTreeWalker(
-        element,
-        NodeFilter.SHOW_TEXT,
-        null,
-        false
-      );
-    while ((node = walk.nextNode())) {
-      if (node.parentElement && node.parentElement.children.length === 0 && !ignoreableTags.some(tag => tag === node.parentElement.nodeName)) list.push(node)
-    }
-    return list;
-  };
-
-  let nodes = Array.from(getTextNodes(document.getElementsByTagName("body")[0]));
-
-
-  let c = 0
-  // Recursively replace the nodes with their parents until reaching limit @param maxAllowedNodeCount
-  while (nodes.length >= maxAllowedNodeCount) {
-    c += 1
-
-    nodes = nodes
-      .filter(n => n.parentNode)
-      .map(n => n.parentNode)
-      .filter(n => !ignoreableTags.some(tag => tag === n.nodeName))
-
+    // loop through nodes in reverse order
+    // as long as we're not past the limit, replace each node with its children
     for (let i = nodes.length - 1; i >= 0; i--) {
-      const p = nodes[i]
-
-      // Add up all descendendants of p recursively until one of the children is n if p is an ancestor to n
-      // Remove duplicates by turning into Set
-      const descendants = [...new Set(nodes.filter(n => p.contains(n) && p !== n).map(decendant => {
-        let children = Array.from(p.children)
-        while (!children.some(child => child === decendant) && children.length !== 0) {
-          children = children.reduce((acc, child) => !child.children ? acc : acc.concat(Array.from(child.children).filter(child => child.innerText)), [])
-        }
-
-        return children
-      }).flat(Infinity))]
-
-      if (descendants.length > 0) {
+      const nodeReplacements = validChildren(nodes[i])
+      if (nodes.length + nodeReplacements.length - 1 > maxAllowedNodeCount) {
+        withinBounds = false
+        break
+      } else if (nodeReplacements.length > 0) {
         nodes.splice(i, 1)
-        nodes = nodes.concat(descendants)
+        nodes = nodes.concat(nodeReplacements)
       }
     }
-
-    // Remove duplicates
-    nodes = [...new Set(nodes)]
-    console.log("Iteration ", c, " node length is ", nodes.length)
   }
 
-  console.log(`Finished parsing. Took ${(new Date() - start) / 1000} s`)
   return nodes
-}
-
-function cleanText(str) {
-  return str.replace(/\s\s+/g, " ").replace("↵", " ").toLowerCase();
-}
-
-// TODO - use this!
-function checkValidString(str) {
-  return str && /^.*[a-zA-Z]+.*$/.test(str)
-}
-
-function chunkString(str, len) {
-  const size = Math.ceil(str.length / len)
-  const r = Array(size)
-  let offset = 0
-
-  for (let i = 0; i < size; i++) {
-    r[i] = str.substr(offset, len)
-    offset += len
-  }
-
-  return r
 }
