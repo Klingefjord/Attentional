@@ -12,17 +12,18 @@ const classificationKey = host => `${CLASSIFICATION_CACHE_KEY}__${host}`
 
 export function getLabels() {
     return new Promise((resolve, reject) => {
-        chrome.storage.sync.get([LABELS_CACHE_KEY], labelObj => {
+        const key = LABELS_CACHE_KEY
+        chrome.storage.local.get([key], result => {
             const error = chrome.runtime.lastError;
             if (error) reject(error)
-            resolve(labelObj.labels ? labelObj.labels : [])
+            resolve(result[key] ? result[key] : [])
         })
     })
 }
 
 export function setLabels(labels) {
     return new Promise((resolve, reject) => {
-        chrome.storage.sync.set({
+        chrome.storage.local.set({
             [LABELS_CACHE_KEY]: labels
         }, () => {
             const error = chrome.runtime.lastError;
@@ -35,10 +36,10 @@ export function setLabels(labels) {
 export function getCachedClassificationResults(host) {
     const key = classificationKey(host)
     return new Promise((resolve, reject) => {
-        chrome.storage.sync.get([key], classificationCache => {
-            const error = chrome.runtime.lastError;
+        chrome.storage.local.get([key], result => {
+            const error = chrome.runtime.lastError
             if (error) reject(error)
-            resolve(classificationCache[key] ? classificationCache[key] : {})
+            resolve(result[key] ? result[key] : {})
         })
     })
 }
@@ -46,10 +47,10 @@ export function getCachedClassificationResults(host) {
 export function setCachedClassificationResults(host, classificationCache) {
     const key = classificationKey(host)
     return new Promise((resolve, reject) => {
-        chrome.storage.sync.set({
+        chrome.storage.local.set({
             [key]: classificationCache
         }, () => {
-            const error = chrome.runtime.lastError;
+            const error = chrome.runtime.lastError
             if (error) reject(error)
             resolve()
         })

@@ -20,6 +20,9 @@ import {
   setCachedClassificationResults,
   getLabels
 } from "../chromeStorage"
+import {
+  UPDATE_CACHE
+} from "../messages";
 
 /**
  * Global var to store cached sequences
@@ -37,10 +40,7 @@ var nodeDisplayProperties;
 
 (function () {
   setupCache().then(() => {
-    if (labels.length === 0) {
-      console.log("No labels, not classifying content")
-      return
-    }
+    if (labels.length === 0) return
     const bodyNode = document.getElementsByTagName("body")[0]
     const initialNodes = getNodesFrom(bodyNode, MAX_SEQUENCE_COUNT)
     initialNodes.forEach(node => nodeDisplayProperties[nodeKey(node)] = node.style.display)
@@ -90,6 +90,7 @@ function registerMutationObserver(rootNode) {
   }
 
   const callback = (mutationsList, observer) => {
+    if (labels.length === 0) return
     for (const mutation of mutationsList) {
       if (mutation.type === 'childList') {
         if (mutation.addedNodes.length > 0) {
@@ -117,11 +118,11 @@ function registerMutationObserver(rootNode) {
  */
 function api(sequences, handler) {
   return getLabels()
-  .then(labels => {
-    if (labels.length === 0) throw new Error("Need to add at least one label")
-    return labels
-  })
-  .then(labels => fetch(`${BASE_URL}/classify`, {
+    .then(labels => {
+      if (labels.length === 0) throw new Error("Need to add at least one label")
+      return labels
+    })
+    .then(labels => fetch(`${BASE_URL}/classify`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -148,7 +149,7 @@ function getNodesFrom(rootNode, allowedNodeCount) {
   const getRelevantChildren = node => {
     const validChildren = node.children ? [...(node.children)]
       .filter(isValidTextNode)
-      .filter(c => !INVALID_TAG_NAMES.some(tag => tag == c.nodeName)) : []
+      .filter(c => !INVALID_TAG_NAMES.includes(c.nodeName)) : []
     return validChildren
   }
 
@@ -186,15 +187,15 @@ function getNodesFrom(rootNode, allowedNodeCount) {
 function setupCache() {
   nodeDisplayProperties = {}
   return getCachedClassificationResults(window.location.host)
-  .then(chromeCache => {
-    cache = chromeCache
-    setInterval(updateCache, CACHE_UPDATE_INTERVAL_MILLIS)
-    return getLabels()
-  })
-  .then(labelsFromStorage => {
-    labels = labelsFromStorage.map(label => label.toLowerCase())
-    return
-  })
+    .then(chromeCache => {
+      cache = chromeCache
+      setInterval(updateCache, CACHE_UPDATE_INTERVAL_MILLIS)
+      return getLabels()
+    })
+    .then(labelsFromStorage => {
+      labels = labelsFromStorage.map(label => label.toLowerCase())
+      return
+    })
 }
 
 function updateCache() {
@@ -203,7 +204,7 @@ function updateCache() {
 
 function handleClassificationResult(key, classificationResult) {
   for (const [label, score] of Object.entries(classificationResult)) {
-    if (score >= OBSCURE_THRESHOLD && labels.some(label => label === label)) {
+    if (score >= OBSCURE_THRESHOLD && labels.includes(label)) {
       [...document.getElementsByClassName(key)].forEach(node => {
         console.log("Hiding node ", node)
         node.style.display = 'none'
@@ -227,3 +228,15 @@ function nodeKey(node) {
 function isValidTextNode(node) {
   return isValidStr(nodeText(node), MIN_TEXT_LENGTH)
 }
+
+/// Event listeners
+chrome.extension.onMessage.addListener((msg, sender, sendResponse) => {
+  if (msg.action === UPDATE_CACHE) {
+    getLabels().then(labelsFromStorage => {
+      labels = labelsFromStorage.map(label => label.toLowerCase())
+      cache = {}
+      updateCache()
+      sendResponse()
+    })
+  }
+})

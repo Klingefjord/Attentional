@@ -4,6 +4,7 @@ import {
     setLabels
 } from './chromeStorage.js'
 import {
+    UPDATE_CACHE,
     FETCH_ACTIVE_ELEMENTS,
     SHOW_ELEMENT
 } from "./messages";
@@ -29,17 +30,35 @@ import {
         })
     }
 
+    const updateCache = () => {
+        chrome.tabs.query({
+            active: true,
+            currentWindow: true
+        }, tabs => {
+            chrome.tabs.sendMessage(tabs[0].id, {
+                action: UPDATE_CACHE
+            }, response => console.log("updated cache.")
+            )})
+    }
+
     const removeElement = label => getLabels().then(labels => {
         const index = labels.indexOf(label)
         if (index > -1) labels.splice(index, 1)
-        setLabels(labels).then(() => updateLabelList(labels))
+        setLabels(labels).then(() => {
+            updateLabelList(labels)
+            updateCache()
+        })
     })
 
     form.addEventListener('submit', event => {
         event.preventDefault()
         getLabels().then(labels => {
             labels.push(labelInput.value)
-            setLabels(labels).then(() => updateLabelList(labels))
+            setLabels(labels)
+                .then(() => {
+                    updateLabelList(labels)
+                    updateCache()
+                })
             labelInput.value = ""
         })
     })
