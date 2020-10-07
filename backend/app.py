@@ -3,8 +3,6 @@ from transformers import pipeline
 import numpy as np
 import time
 
-threshold = 0.6
-
 app = Flask(__name__)
 classifier = pipeline("zero-shot-classification")
 
@@ -33,15 +31,14 @@ def classify():
         scores = preds.mean(0).squeeze().tolist() # average the rows
         if (isinstance(scores, float)): scores = [scores] # numpy squeezes 1d arrays into scalars...
         assert len(scores) == len(labels)
-        print("==============")
-        print(f"key: ", key)
-        print(f"sequence: ”{sequence_chunks[0][0:20]} [...]”")
-        print(f"labels: ", labels)
-        print(f"Scores: ", scores)
-        print("==============")
-        if (max(scores)) < threshold: continue # only return labels that passed the threshold
-        pred_label = labels[scores.index(max(scores))]
-        response[key] = pred_label
+        # print("==============")
+        # print(f"key: ", key)
+        # print(f"sequence: ”{sequence_chunks[0][0:20]} [...]”")
+        # print(f"labels: ", labels)
+        # print(f"Scores: ", scores)
+        # print("==============")
+        response[key] = {}
+        for (label, score) in zip(labels, scores): response[key][label] = score
     
     print(f"Classified request with {len(sequences)} sequences. Took {time.time() - start_time} seconds")
     print(response)

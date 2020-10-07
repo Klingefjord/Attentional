@@ -21,13 +21,13 @@ if (fileSystem.existsSync(secretsPath)) {
 var options = {
   mode: process.env.NODE_ENV || "development",
   entry: {
-    extract: path.join(__dirname, "src", "js", "content", "extract.js"),
+    classifier: path.join(__dirname, "src", "js", "content", "classifier.js"),
     popup: path.join(__dirname, "src", "js", "popup.js"),
     options: path.join(__dirname, "src", "js", "options.js"),
     background: path.join(__dirname, "src", "js", "background.js")
   },
   chromeExtensionBoilerplate: {
-    notHotReload: ["extract", "popup", "background"]
+    notHotReload: ["classifier", "popup", "background"]
   },
   output: {
     path: path.join(__dirname, "build"),

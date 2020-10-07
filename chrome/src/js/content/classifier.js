@@ -6,6 +6,7 @@ import {
   MAX_SEQUENCE_COUNT,
   MAX_TEXT_LENGTH,
   MIN_TEXT_LENGTH,
+  OBSCURE_THRESHOLD
 } from "../constants.js"
 import {
   chunkify,
@@ -15,23 +16,31 @@ import {
 } from "../utils.js"
 
 import {
-  getSequenceCache,
-  setSequenceCache,
+  getCachedClassificationResults,
+  setCachedClassificationResults,
   getLabels
 } from "../chromeStorage"
 
-// Global var to store the cached sequences
-// {
-//  "key": "label" 
-// }
+/**
+ * Global var to store cached sequences
+ * {
+ *   "key1"(string): {
+ *     "label1"(string): score(float),
+ *     "label2"(string): score(float)
+ *   },
+ *   "key2": ...
+ * }
+ */
 var cache;
+var labels;
 
 (function () {
-  const bodyNode = document.getElementsByTagName("body")[0]
-  getSequenceCache().then(chromeCache => {
-    console.log("CACHE IS ", chromeCache)
-    cache = chromeCache
-    setInterval(updateCache, CACHE_UPDATE_INTERVAL_MILLIS)
+  setupCache().then(() => {
+    if (labels.length === 0) {
+      console.log("No labels, not classifying content")
+      return
+    }
+    const bodyNode = document.getElementsByTagName("body")[0]
     updateNodes(getNodesFrom(bodyNode, MAX_SEQUENCE_COUNT), MAX_TEXT_LENGTH)
     registerMutationObserver(bodyNode)
   })
@@ -48,10 +57,9 @@ function updateNodes(nodes, maxTextLength) {
 
     if (cache[key]) {
       node.classList.add(key)
-      hide(key)
+      handleClassificationResult(key, cache[key])
     } else {
       node.classList.add(key)
-
       pendingApi[key] = chunkify(nodeText(node), maxTextLength)
     }
   }
@@ -59,8 +67,9 @@ function updateNodes(nodes, maxTextLength) {
   if (Object.keys(pendingApi).length !== 0) {
     api(pendingApi, responseBody => {
       for (const key in responseBody) {
-        cache[key] = responseBody[key] 
-        hide(key)
+        const classificationResult = responseBody[key]
+        cache[key] = classificationResult
+        handleClassificationResult(key, classificationResult)
       }
     })
   }
@@ -166,12 +175,29 @@ function getNodesFrom(rootNode, allowedNodeCount) {
 }
 
 /// Util functions
-function updateCache() {
-  setSequenceCache(cache).then(getSequenceCache).then(c => console.log("Udated cache, now it's ", c))
+function setupCache() {
+  return getCachedClassificationResults(window.location.host)
+  .then(chromeCache => {
+    cache = chromeCache
+    setInterval(updateCache, CACHE_UPDATE_INTERVAL_MILLIS)
+    return getLabels()
+  })
+  .then(labelsFromStorage => {
+    labels = labelsFromStorage.map(label => label.toLowerCase())
+    return
+  })
 }
 
-function hide(className) {
-  document.getElementsByClassName(className)[0].style.display = "none";
+function updateCache() {
+  setCachedClassificationResults(window.location.host, cache)
+}
+
+function handleClassificationResult(key, classificationResult) {
+  for (const [label, score] of Object.entries(classificationResult)) {
+    if (score >= OBSCURE_THRESHOLD && labels.some(label => label === label)) {
+      document.getElementsByClassName(key)[0].style.display = "none";
+    }
+  }
 }
 
 function nodeText(node) {
