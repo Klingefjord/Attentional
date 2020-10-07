@@ -1,5 +1,5 @@
 export function cleanText(str) {
-    return str.replace(/\s\s+/g, " ").replace("↵", " ").toLowerCase();
+    return str.replace(/\s\s+/g, " ").replace("↵", " ").replace("\n", " ").toLowerCase();
 }
 
 export function isValidStr(str, minLength) {

@@ -3,6 +3,10 @@ import {
     getLabels,
     setLabels
 } from './chromeStorage.js'
+import {
+    FETCH_ACTIVE_ELEMENTS,
+    SHOW_ELEMENT
+} from "./messages";
 
 (function () {
     const extractTextContent = document.getElementById('txt-content-btn')
@@ -10,6 +14,9 @@ import {
     const labelInput = document.getElementById('label-input')
     const labelList = document.getElementById('label-list')
     const form = document.getElementById('label-form')
+
+    const hiddenList = document.getElementById('hidden-list')
+    const showHidden = document.getElementById('show-hidden')
 
     const updateLabelList = labels => {
         if (!Array.isArray(labels)) return
@@ -50,6 +57,35 @@ import {
                 file: 'classifier.bundle.js'
             })
         )
+    }
+
+    showHidden.onclick = event => updateHiddenList()
+
+    const updateHiddenList = () => {
+        chrome.tabs.query({
+            active: true,
+            currentWindow: true
+        }, tabs => {
+            chrome.tabs.sendMessage(tabs[0].id, {
+                action: FETCH_ACTIVE_ELEMENTS
+            }, response => {
+                hiddenList.innerHTML = ""
+                for (const hiddenNode of response) {
+                    let li = document.createElement("li")
+                    li.addEventListener('click', _ => {
+                        chrome.tabs.query({
+                            active: true,
+                            currentWindow: true
+                        }, tabs => chrome.tabs.sendMessage(tabs[0].id, {
+                            action: SHOW_ELEMENT,
+                            key: hiddenNode.key
+                        }, response => updateHiddenList()))
+                    })
+                    li.appendChild(document.createTextNode(hiddenNode.text))
+                    hiddenList.appendChild(li)
+                }
+            })
+        })
     }
 
     getLabels().then(updateLabelList)

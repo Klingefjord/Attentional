@@ -22,12 +22,13 @@ var options = {
   mode: process.env.NODE_ENV || "development",
   entry: {
     classifier: path.join(__dirname, "src", "js", "content", "classifier.js"),
+    fetchNodes: path.join(__dirname, "src", "js", "content", "fetchNodes.js"),
     popup: path.join(__dirname, "src", "js", "popup.js"),
     options: path.join(__dirname, "src", "js", "options.js"),
     background: path.join(__dirname, "src", "js", "background.js")
   },
   chromeExtensionBoilerplate: {
-    notHotReload: ["classifier", "popup", "background"]
+    notHotReload: ["fetchNodes", "classifier", "popup", "background"]
   },
   output: {
     path: path.join(__dirname, "build"),

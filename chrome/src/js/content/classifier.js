@@ -33,6 +33,7 @@ import {
  */
 var cache;
 var labels;
+var nodeDisplayProperties;
 
 (function () {
   setupCache().then(() => {
@@ -41,7 +42,9 @@ var labels;
       return
     }
     const bodyNode = document.getElementsByTagName("body")[0]
-    updateNodes(getNodesFrom(bodyNode, MAX_SEQUENCE_COUNT), MAX_TEXT_LENGTH)
+    const initialNodes = getNodesFrom(bodyNode, MAX_SEQUENCE_COUNT)
+    initialNodes.forEach(node => nodeDisplayProperties[nodeKey(node)] = node.style.display)
+    updateNodes(initialNodes, MAX_TEXT_LENGTH)
     registerMutationObserver(bodyNode)
   })
 })()
@@ -90,6 +93,11 @@ function registerMutationObserver(rootNode) {
     for (const mutation of mutationsList) {
       if (mutation.type === 'childList') {
         if (mutation.addedNodes.length > 0) {
+          const relevantNodes = [...mutation.addedNodes].filter(isValidTextNode)
+          relevantNodes.forEach(node => {
+            nodeDisplayProperties[nodeKey(node)] = node.style.display
+            node.style.display = 'none'
+          })
           updateNodes([...mutation.addedNodes].filter(isValidTextNode), MAX_TEXT_LENGTH)
         }
       }
@@ -176,6 +184,7 @@ function getNodesFrom(rootNode, allowedNodeCount) {
 
 /// Util functions
 function setupCache() {
+  nodeDisplayProperties = {}
   return getCachedClassificationResults(window.location.host)
   .then(chromeCache => {
     cache = chromeCache
@@ -195,7 +204,14 @@ function updateCache() {
 function handleClassificationResult(key, classificationResult) {
   for (const [label, score] of Object.entries(classificationResult)) {
     if (score >= OBSCURE_THRESHOLD && labels.some(label => label === label)) {
-      document.getElementsByClassName(key)[0].style.display = "none";
+      [...document.getElementsByClassName(key)].forEach(node => {
+        console.log("Hiding node ", node)
+        node.style.display = 'none'
+      })
+    } else {
+      [...document.getElementsByClassName(key)].forEach(node => {
+        node.style.display = nodeDisplayProperties[key] ? nodeDisplayProperties[key] : ''
+      })
     }
   }
 }
