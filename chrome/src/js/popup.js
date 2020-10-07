@@ -1,11 +1,15 @@
 import "../css/popup.css";
-import { LABELS } from './constants.js'
+import {
+    getLabels,
+    setLabels
+} from './chromeStorage.js'
 
-(function() {
-    const extractTextContent = document.getElementById('txt-content-btn');
-    const labelInput = document.getElementById('label-input');
-    const labelList = document.getElementById('label-list');
-    const form = document.getElementById('label-form');
+(function () {
+    const extractTextContent = document.getElementById('txt-content-btn')
+    const clearStorage = document.getElementById('clr-content-btn')
+    const labelInput = document.getElementById('label-input')
+    const labelList = document.getElementById('label-list')
+    const form = document.getElementById('label-form')
 
     const updateLabelList = labels => {
         if (!Array.isArray(labels)) return
@@ -17,34 +21,36 @@ import { LABELS } from './constants.js'
             labelList.appendChild(li)
         })
     }
-    
-    const removeElement = label => {
-        chrome.storage.sync.get([LABELS], labelObj => {
-            if (labelObj.labels) {
-                let labels = labelObj.labels
-                const index = labels.indexOf(label);
-                if (index > -1) labels.splice(index, 1);
-                chrome.storage.sync.set({[LABELS]: labels}, () => updateLabelList(labels))
-            }
-        })
-    }
-    
+
+    const removeElement = label => getLabels().then(labels => {
+        const index = labels.indexOf(label)
+        if (index > -1) labels.splice(index, 1)
+        setLabels(labels).then(() => updateLabelList(labels))
+    })
+
     form.addEventListener('submit', event => {
         event.preventDefault()
-        chrome.storage.sync.get([LABELS], labelObj => {
-            let list = []
-            if (labelObj.labels && Array.isArray(labelObj.labels)) list = list.concat(labelObj.labels)
-            list.push(labelInput.value)
-            chrome.storage.sync.set({[LABELS]: list}, () => updateLabelList(list))
+        getLabels().then(labels => {
+            labels.push(labelInput.value)
+            setLabels(labels).then(() => updateLabelList(labels))
             labelInput.value = ""
         })
     })
-    
+
+    clearStorage.onclick = event => {
+        chrome.storage.sync.clear(() => getLabels().then(updateLabelList))
+    }
+
     extractTextContent.onclick = event => {
-        chrome.tabs.query({active: true, currentWindow: true}, tabs => 
-            chrome.tabs.executeScript(tabs[0].id, { file: 'extract.bundle.js' })
+        chrome.tabs.query({
+                active: true,
+                currentWindow: true
+            }, tabs =>
+            chrome.tabs.executeScript(tabs[0].id, {
+                file: 'extract.bundle.js'
+            })
         )
     }
-    
-    chrome.storage.sync.get([LABELS], labelObj => updateLabelList(labelObj.labels))
+
+    getLabels().then(updateLabelList)
 })()

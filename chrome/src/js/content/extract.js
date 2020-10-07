@@ -2,57 +2,49 @@ import {
   BASE_URL
 } from "../../../utils/env"
 import {
-  LABELS,
-  SEQUENCES,
   CACHE_UPDATE_INTERVAL_MILLIS,
   MAX_SEQUENCE_COUNT,
   MAX_TEXT_LENGTH,
   MIN_TEXT_LENGTH,
 } from "../constants.js"
 import {
-  chunkString as chunkify,
+  chunkify,
   isValidStr,
-  cleanText,
-  unixTimestamp
+  hashCode,
+  cleanText
 } from "../utils.js"
+
+import {
+  getSequenceCache,
+  setSequenceCache,
+  getLabels
+} from "../chromeStorage"
 
 // Global var to store the cached sequences
 // {
-//  "sequence": string,
-//  "tag": string
+//  "key": "label" 
 // }
-var cache = []
+var cache;
 
 (function () {
   const bodyNode = document.getElementsByTagName("body")[0]
-  chrome.storage.sync.get([SEQUENCES], sequences => {
-    cache = sequences
+  getSequenceCache().then(chromeCache => {
+    console.log("CACHE IS ", chromeCache)
+    cache = chromeCache
     setInterval(updateCache, CACHE_UPDATE_INTERVAL_MILLIS)
+    updateNodes(getNodesFrom(bodyNode, MAX_SEQUENCE_COUNT), MAX_TEXT_LENGTH)
     registerMutationObserver(bodyNode)
-    updateNodes(getNodesFrom(bodyNode))
   })
 })()
 
-// Add a mutation listener to the document. On every addChildren event, check cached values. 
-// If none are present for the textContent being added, then proceed to run main algo and store in cache when done. Periodically
-// sync with chrome storage every 5 seconds
-
-function hide(className) {
-  document.getElementsByClassName(className)[0].style.display = "none";
-}
-
-function nodeText(node) {
-  return cleanText(node.innerText ? node.innerText : node.textContent)
-}
-
-function isValidTextNode(node) {
-  return isValidStr(node.innerText, MIN_TEXT_LENGTH)
-}
-
-function updateNodes(nodes) {
+/**
+ * Checks the cache for @param nodes and add the appropriate class if they exist, 
+ * otherwise calls the @function api with them
+ */
+function updateNodes(nodes, maxTextLength) {
   let pendingApi = {}
   for (const node of nodes) {
-    const key = `attn_${hashCode(nodeText(node))}`
+    const key = nodeKey(node)
 
     if (cache[key]) {
       node.classList.add(key)
@@ -66,11 +58,18 @@ function updateNodes(nodes) {
 
   if (Object.keys(pendingApi).length !== 0) {
     api(pendingApi, responseBody => {
-      for (const key in responseBody) hide(key)
+      for (const key in responseBody) {
+        cache[key] = responseBody[key] 
+        hide(key)
+      }
     })
   }
 }
 
+/**
+ * Adds a mutation listener to the @param rootNode listening for addChildren events 
+ * and calling @function updateNodes for all new added nodes
+ */
 function registerMutationObserver(rootNode) {
   const config = {
     attributes: false,
@@ -79,21 +78,11 @@ function registerMutationObserver(rootNode) {
   }
 
   const callback = (mutationsList, observer) => {
-    // Use traditional 'for loops' for IE 11
     for (const mutation of mutationsList) {
       if (mutation.type === 'childList') {
-
-
-
-        console.log('A child node has been added or removed.');
-        console.log(mutation)
         if (mutation.addedNodes.length > 0) {
-          updateNodes(nodes.filter(isValidTextNode))
-          mutation.addedNodes.forEach(n => {
-            if (n.innerText) console.log(n.innerText)
-          })
+          updateNodes([...mutation.addedNodes].filter(isValidTextNode), MAX_TEXT_LENGTH)
         }
-        //console.log(getNodes(MAX_SEQUENCE_COUNT, MIN_TEXT_LENGTH))
       }
     }
   }
@@ -105,40 +94,38 @@ function registerMutationObserver(rootNode) {
   observer.observe(rootNode, config);
 }
 
-function updateCache() {
-  chrome.storage.sync.set({
-    [SEQUENCES]: cache
-  }, () => {})
-}
-
+/**
+ * Calls the /classify api with the @param sequences and labels from chrome storage, 
+ * and call the @param handler on response
+ */
 function api(sequences, handler) {
-  return chrome.storage.sync.get([LABELS], (labelObj) => {
-    let labels = labelObj.labels;
-    if (!Array.isArray(labels))
-      alert("You need to add one or more labels first");
-    fetch(`${BASE_URL}/classify`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Access-Control-Allow-Origin": "*",
-        },
-        body: JSON.stringify({
-          sequences: sequences,
-          labels: labels
-        }),
+  return getLabels()
+  .then(labels => {
+    if (labels.length === 0) throw new Error("Need to add at least one label")
+    return labels
+  })
+  .then(labels => fetch(`${BASE_URL}/classify`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*",
+      },
+      body: JSON.stringify({
+        sequences: sequences,
+        labels: labels
       })
-      .then((response) => response.json())
-      .then(responseBody => handler(responseBody));
-  });
+    }))
+    .then(response => response.json())
+    .then(responseBody => handler(responseBody))
 }
 
 /**
- * Algorithm for finding text nodes
+ * Algorithm for finding text nodes from a root with a granularity capped by @param allowedNodeCount
  *    
  * From the body tag, recursively sorts tags on text content length and replaces all tags
  * with their children until @param allowedNodeCount limit is reached
  */
-function getNodesFrom(rootNode, allowedNodeCount, minTextLength) {
+function getNodesFrom(rootNode, allowedNodeCount) {
   const INVALID_TAG_NAMES = ["SCRIPT", "NOSCRIPT", "HTML"]
 
   const getRelevantChildren = node => {
@@ -176,4 +163,25 @@ function getNodesFrom(rootNode, allowedNodeCount, minTextLength) {
   }
 
   return nodes
+}
+
+/// Util functions
+function updateCache() {
+  setSequenceCache(cache).then(getSequenceCache).then(c => console.log("Udated cache, now it's ", c))
+}
+
+function hide(className) {
+  document.getElementsByClassName(className)[0].style.display = "none";
+}
+
+function nodeText(node) {
+  return cleanText(node.innerText ? node.innerText : node.textContent)
+}
+
+function nodeKey(node) {
+  return `attn_${hashCode(nodeText(node))}`
+}
+
+function isValidTextNode(node) {
+  return isValidStr(nodeText(node), MIN_TEXT_LENGTH)
 }
