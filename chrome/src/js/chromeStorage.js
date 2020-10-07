@@ -1,5 +1,14 @@
 const LABELS_CACHE_KEY = "labels"
-const SEQUENCES_CACHE_KEY = "sequences"
+const CLASSIFICATION_CACHE_KEY = "clf_cache"
+
+const classificationKey = host => `${CLASSIFICATION_CACHE_KEY}__${host}`
+
+
+/**
+ * Wrapper for chrome storage
+ * 
+ * Might have to change this to `chrome.storage.local` eventually, as .sync only allows 104KB whereas .local allows 5.2MB
+ */
 
 export function getLabels() {
     return new Promise((resolve, reject) => {
@@ -23,20 +32,22 @@ export function setLabels(labels) {
     })
 }
 
-export function getSequenceCache() {
+export function getCachedClassificationResults(host) {
+    const key = classificationKey(host)
     return new Promise((resolve, reject) => {
-        chrome.storage.sync.get([SEQUENCES_CACHE_KEY], sequenceObj => {
+        chrome.storage.sync.get([key], classificationCache => {
             const error = chrome.runtime.lastError;
             if (error) reject(error)
-            resolve(sequenceObj.sequences ? sequenceObj.sequences : {})
+            resolve(classificationCache[key] ? classificationCache[key] : {})
         })
     })
 }
 
-export function setSequenceCache(sequenceCache) {
+export function setCachedClassificationResults(host, classificationCache) {
+    const key = classificationKey(host)
     return new Promise((resolve, reject) => {
         chrome.storage.sync.set({
-            [SEQUENCES_CACHE_KEY]: sequenceCache
+            [key]: classificationCache
         }, () => {
             const error = chrome.runtime.lastError;
             if (error) reject(error)

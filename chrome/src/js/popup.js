@@ -47,7 +47,7 @@ import {
                 currentWindow: true
             }, tabs =>
             chrome.tabs.executeScript(tabs[0].id, {
-                file: 'extract.bundle.js'
+                file: 'classifier.bundle.js'
             })
         )
     }
