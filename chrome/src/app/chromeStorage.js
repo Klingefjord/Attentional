@@ -15,7 +15,6 @@ export function clear() {
         chrome.storage.local.clear(() => {
             const error = chrome.runtime.lastError;
             if (error) reject(error)
-
             resolve()
         })
     })
