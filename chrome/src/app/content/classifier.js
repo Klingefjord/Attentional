@@ -21,7 +21,7 @@ import {
   getLabels
 } from "../chromeStorage"
 import {
-  UPDATE_CACHE
+  CACHE_UPDATE
 } from "../messages";
 
 /**
@@ -231,7 +231,7 @@ function isValidTextNode(node) {
 
 /// Event listeners
 chrome.extension.onMessage.addListener((msg, sender, sendResponse) => {
-  if (msg.action === UPDATE_CACHE) {
+  if (msg.action === CACHE_UPDATE) {
     getLabels().then(labelsFromStorage => {
       labels = labelsFromStorage.map(label => label.toLowerCase())
       cache = {}

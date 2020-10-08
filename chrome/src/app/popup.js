@@ -4,7 +4,7 @@ import {
     setLabels
 } from './chromeStorage.js'
 import {
-    UPDATE_CACHE,
+    CACHE_UPDATE,
     FETCH_ACTIVE_ELEMENTS,
     SHOW_ELEMENT
 } from "./messages";
@@ -36,7 +36,7 @@ import {
             currentWindow: true
         }, tabs => {
             chrome.tabs.sendMessage(tabs[0].id, {
-                action: UPDATE_CACHE
+                action: CACHE_UPDATE
             }, response => console.log("updated cache.")
             )})
     }
