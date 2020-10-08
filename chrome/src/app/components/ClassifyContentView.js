@@ -8,11 +8,9 @@ import {
   setLabels as setLabelsInStorage,
   clear as clearStorage
 } from '../chromeStorage'
+import { CLASSIFIER_ID } from '../constants'
 import {
-  ID as CLASSIFIER_ID
-} from '../content/classifier'
-import {
-  CACHE_UPDATE
+  LABEL_UPDATE
 } from "../messages";
 
 
@@ -46,18 +44,21 @@ const ClassifyContentView = props => {
   const updateLabels = newLabels => {
     setLabels(newLabels)
 
-    const notifyCacheUpdate = () => {
+    const notifyListeners = () => {
       chrome.tabs.query({
         active: true,
         currentWindow: true
       }, tabs => {
         chrome.tabs.sendMessage(tabs[0].id, {
-          action: CACHE_UPDATE
-        }, response => console.log("Cache was updated"))
+          action: LABEL_UPDATE,
+          labels: newLabels
+        }, response => {
+          return true
+        })
       })
     }
 
-    setLabelsInStorage(newLabels).then(notifyCacheUpdate)
+    setLabelsInStorage(newLabels).then(notifyListeners)
   }
 
   const runClassifier = _ => {

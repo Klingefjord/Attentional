@@ -12,3 +12,5 @@ export const OBSCURE_THRESHOLD = 0.6
 
 // How often to sync local cache with chrome storage
 export const CACHE_UPDATE_INTERVAL_MILLIS = 20_000
+
+export const CLASSIFIER_ID = "classifier.bundle.js"

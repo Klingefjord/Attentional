@@ -7,24 +7,22 @@ import {
   MAX_TEXT_LENGTH,
   MIN_TEXT_LENGTH,
   OBSCURE_THRESHOLD
-} from "../constants.js"
+} from "../../app/constants.js"
 import {
   chunkify,
   isValidStr,
   hashCode,
   cleanText
-} from "../utils.js"
+} from "../../app/utils.js"
 
 import {
   getCachedClassificationResults,
   setCachedClassificationResults,
   getLabels
-} from "../chromeStorage"
+} from "../../app/chromeStorage"
 import {
-  CACHE_UPDATE
-} from "../messages";
-
-export const ID = "classifier.bundle.js"
+  LABEL_UPDATE as LABEL_UPDATE
+} from "../../app/messages";
 
 /**
  * Global var to store cached sequences
@@ -48,7 +46,6 @@ var nodeDisplayProperties;
     initialNodes.forEach(node => nodeDisplayProperties[nodeKey(node)] = node.style.display)
     updateNodes(initialNodes, MAX_TEXT_LENGTH)
     registerMutationObserver(bodyNode)
-    sendResponse()
   })
 })()
 
@@ -234,12 +231,10 @@ function isValidTextNode(node) {
 
 /// Event listeners
 chrome.extension.onMessage.addListener((msg, sender, sendResponse) => {
-  if (msg.action === CACHE_UPDATE) {
-    getLabels().then(labelsFromStorage => {
-      labels = labelsFromStorage.map(label => label.toLowerCase())
+  if (msg.action === LABEL_UPDATE) {
+      labels = msg.labels.map(label => label.toLowerCase())
       cache = {}
       updateCache()
-      sendResponse()
-    })
+      sendResponse(true)
   }
 })
