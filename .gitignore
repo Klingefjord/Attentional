@@ -3,5 +3,6 @@
 /chrome/node_modules
 /chrome/build
 /chrome/secrets.*.js
+/chrome/yarn.lock
 /backend/.vscode/
 /backend/__pycache__/
