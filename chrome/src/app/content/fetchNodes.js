@@ -4,6 +4,8 @@ import {
 } from '../messages.js'
 import { cleanText } from '../utils.js'
 
+export const ID = "classifier.bundle.js"
+
 chrome.extension.onMessage.addListener((msg, sender, sendResponse) => {
     if (msg.action === FETCH_ACTIVE_ELEMENTS) {
         const hiddenNodes = [...document.querySelectorAll("[class^=attn_]")]

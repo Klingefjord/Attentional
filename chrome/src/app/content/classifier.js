@@ -24,6 +24,8 @@ import {
   CACHE_UPDATE
 } from "../messages";
 
+export const ID = "classifier.bundle.js"
+
 /**
  * Global var to store cached sequences
  * {
@@ -46,6 +48,7 @@ var nodeDisplayProperties;
     initialNodes.forEach(node => nodeDisplayProperties[nodeKey(node)] = node.style.display)
     updateNodes(initialNodes, MAX_TEXT_LENGTH)
     registerMutationObserver(bodyNode)
+    sendResponse()
   })
 })()
 

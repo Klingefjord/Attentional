@@ -23,7 +23,7 @@ const App = props => {
       <button onClick={() => setActiveTab(0)}>Classify Content</button>
       <button onClick={() => setActiveTab(1)}>Remove Features</button>
       <button onClick={() => setActiveTab(2)}>Show Hidden Content</button>
-      { content(activeTab) }
+      {content(activeTab)}
     </div>
   )
 }

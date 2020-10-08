@@ -69,8 +69,6 @@ var options = {
     new CleanWebpackPlugin(),
     // expose and write the allowed env vars on the compiled bundle
     new webpack.EnvironmentPlugin(["NODE_ENV"]),
-
-
     new HtmlWebpackPlugin({
       title: "Attentional",
       meta: {
@@ -80,22 +78,10 @@ var options = {
       },
       manifest: "manifest.json",
       filename: "index.html",
+      chunks: ["app"],
       template: "src/static/index.html",
       hash: true
     }),
-
-   // new CopyWebpackPlugin([{
-   //   from: "src/manifest.json",
-   //   transform: function (content, path) {
-   //     // generates the manifest file using the package.json informations
-   //     return Buffer.from(JSON.stringify({
-   //       description: process.env.npm_package_description,
-   //       version: process.env.npm_package_version,
-   //       ...JSON.parse(content.toString())
-   //     }))
-   //   }
-   // }]),
-	
     new CopyWebpackPlugin({
       patterns: [{ 
         from: "src/chrome/icons", 
