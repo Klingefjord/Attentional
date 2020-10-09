@@ -7,11 +7,11 @@ import {
   getLabels as getLabelsFromStorage,
   setLabels as setLabelsInStorage,
   clear as clearStorage
-} from '../chromeStorage'
-import { CLASSIFIER_ID } from '../constants'
+} from '../../chromeStorage'
+import { CLASSIFIER_ID } from '../../constants'
 import {
   LABEL_UPDATE
-} from "../messages";
+} from "../../messages";
 
 
 const ClassifyContentView = props => {

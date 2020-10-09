@@ -1,3 +1,17 @@
+import { MIN_TEXT_LENGTH } from '../../constants'
+
+export function nodeText(node) {
+    return cleanText(node.innerText ? node.innerText : node.textContent)
+}
+  
+export function nodeKey(node) {
+    return `attn_${hashCode(nodeText(node))}`
+}
+  
+export function isValidTextNode(node) {
+    return isValidStr(nodeText(node), MIN_TEXT_LENGTH)
+}
+
 export function cleanText(str) {
     return str.replace(/\s\s+/g, " ").replace("↵", " ").replace("\n", " ").toLowerCase();
 }

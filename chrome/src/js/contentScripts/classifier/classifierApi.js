@@ -1,10 +1,10 @@
 import regeneratorRuntime from "regenerator-runtime";
 import {
     OBSCURE_THRESHOLD
-} from "../../app/constants.js"
+} from "../../constants"
 import {
     BASE_URL
-} from "../../../utils/env"
+} from "../../../../utils/env"
 
 /**
  * Calls the /classify api with the @param sequences and labels from chrome storage
@@ -34,7 +34,7 @@ import {
  *   ...
  * }
  */
-export default async function classify(sequences, labels) {
+export async function classify(sequences, labels) {
     if (Object.keys(sequences).length === 0) return {}
     if (labels.length === 0) throw new Error("Need to add at least one label")
 
@@ -52,14 +52,19 @@ export default async function classify(sequences, labels) {
         .then(responseBody => convertToCacheObject(responseBody, labels))
 }
 
-const convertToCacheObject = (apiResponse, labels) =>
-    Object.keys(apiResponse).map((key, idx) => {
-        apiResponse[key] = {
+const convertToCacheObject = (response, labels) => {
+    console.log("Response from api is ", response)
+    Object.keys(response).map((key, idx) => {
+        response[key] = {
             classificationResults: {
-                ...apiResponse[key]
+                ...response[key]
             },
             decision: {
-                hide: Object.keys(apiResponse[key]).some(label => apiResponse[key][label] >= OBSCURE_THRESHOLD && labels.includes(label))
+                hide: Object.keys(response[key]).some(label => response[key][label] >= OBSCURE_THRESHOLD && labels.includes(label))
             }
         }
     })
+
+    console.log("Mapped response is ", response)
+    return response
+}

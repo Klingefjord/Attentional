@@ -2,22 +2,20 @@ import regeneratorRuntime from "regenerator-runtime";
 import {
   CACHE_UPDATE_INTERVAL_MILLIS,
   MAX_TEXT_LENGTH,
-} from "../../app/constants.js"
-import {
-  chunkify
-} from "../../app/utils.js"
+} from "../../constants"
 
 import {
   nodeKey,
-  nodeText
+  nodeText,
+  chunkify
 } from "./utils"
 
 import {
-  getNodesFrom
+  extractNodes
 } from './extractNodes'
 import {
   classify
-} from './classifier'
+} from './classifierApi'
 
 import {
   registerMutationObserver
@@ -27,10 +25,10 @@ import {
   getCachedClassificationResults,
   setCachedClassificationResults,
   getLabels
-} from "../../app/chromeStorage"
+} from "../../chromeStorage"
 import {
   LABEL_UPDATE as LABEL_UPDATE
-} from "../../app/messages";
+} from "../../messages";
 
 /**
  * Global var to store cached sequences
@@ -56,14 +54,16 @@ var cache;
 var labels;
 
 (function () {
-  await setupCache()
-  if (labels.length === 0) return
-  const bodyNode = document.getElementsByTagName("body")[0]
-  const initialNodes = getNodesFrom(bodyNode)
-  updateNodes(initialNodes).then(render)
-  registerMutationObserver(bodyNode, nodes => {
-    nodes.forEach(n => n.style.display = 'none')
-    updateNodes(nodes).then(render)
+  console.log("Running classifier")
+  setupCache().then(() => {
+    if (labels.length === 0) return
+    const bodyNode = document.getElementsByTagName("body")[0]
+    const initialNodes = extractNodes(bodyNode)
+    updateNodes(initialNodes).then(render)
+    registerMutationObserver(bodyNode, labels, nodes => {
+      nodes.forEach(n => n.style.display = 'none')
+      updateNodes(nodes).then(render)
+    })
   })
 })()
 
@@ -72,15 +72,15 @@ var labels;
  * otherwise calls the @function api with them
  * updates the 
  */
-async function updateNodes(nodes) {
+function updateNodes(nodes) {
   const pendingApi = {}
-  const results = {}
+  const existing = {}
   for (const node of nodes) {
     const key = nodeKey(node)
 
     if (cache[key]) {
       node.classList.add(key)
-      results[key] = cache[key]
+      existing[key] = cache[key]
     } else {
       node.classList.add(key)
       pendingApi[key] = chunkify(nodeText(node), MAX_TEXT_LENGTH)
@@ -88,25 +88,34 @@ async function updateNodes(nodes) {
   }
 
   // classify using api and merge with cached results
-  const apiResults = await classify(pendingApi, labels)
-  Object.keys(apiResults).map((key, idx) => results[key] = {...apiResults[key]})
+  return classify(pendingApi, labels).then(apiResults => {
+    const results = {
+      ...existing,
+      ...apiResults
+    }
 
-  // Store results in cache
-  Object.keys(results).map((key, idx) => cache[key] = {...results[key]})
+    console.log("api results ", apiResults)
+    console.log("existing results ", existing)
+    console.log("combined results ", results)
 
-  return results
+    // Store results in cache
+    cache = {
+      ...cache,
+      ...results
+    }
+
+    return results
+  })
 }
 
 /**
  * Either hides or shows @param entries depending on the hide and override properties in the `entry.decision` object
  */
 function render(entries) {
+  console.log("time to render: ", entries)
   for (const [key, val] of Object.entries(entries)) {
-    const classificationResult = val.classificationResult
     const decision = val.decision
-    
-    if (!classificationResult || !decision) continue
-
+    if (!decision) continue
     const hide = decision.override ? decision.override : decision.hide
     const setDisplayProperty = node => node.style.display = hide ? 'none' : ''
     Array.from(document.getElementsByClassName(key)).forEach(setDisplayProperty)
@@ -131,11 +140,51 @@ function updateCache() {
 }
 
 /// Event listeners
+function handleLabelUpdate(msg, response) {
+  labels = msg.labels.map(label => label.toLowerCase())
+  cache = {}
+  updateCache()
+  response(true)
+}
+
+function handleFetchHidden(msg, response) {
+  const hidden = []
+  Object.keys(cache)
+    .map(key => {
+      if (cache[key].decision && (cache[key].decision.override || cache[key].decision.hide)) {
+        hidden.push({
+          key: key,
+          text: [...document.getElementsByClassName(key)].map(nodeText)[0]
+        })
+      }
+    })
+
+  response({
+    hidden: hidden
+  })
+}
+
+function handleShowElement(msg, response) {
+  const key = msg.key
+  const entry = cache[key]
+  if (!entry) {
+    sendResponse(false)
+    return
+  }
+  cache[key] = {
+    ...entry,
+    override: true
+  }
+  render([entry])
+  response(true)
+}
+
 chrome.extension.onMessage.addListener((msg, sender, sendResponse) => {
   if (msg.action === LABEL_UPDATE) {
-    labels = msg.labels.map(label => label.toLowerCase())
-    cache = {}
-    updateCache()
-    sendResponse(true)
+    handleLabelUpdate(msg, sendResponse)
+  } else if (msg.action === FETCH_HIDDEN) {
+    handleFetchHidden(msg, sendResponse)
+  } else if (msg.action === SHOW_ELEMENT) {
+    handleShowElement(msg, response)
   }
 })

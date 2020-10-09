@@ -3,7 +3,7 @@ import {
 } from "./utils"
 
 
-import { MAX_SEQUENCE_COUNT } from '../../app/constants'
+import { MAX_SEQUENCE_COUNT } from '../../constants'
 
 /**
  * Algorithm for finding text nodes from a root with a granularity capped by @const MAX_SEQUENCE_COUNT
@@ -11,7 +11,7 @@ import { MAX_SEQUENCE_COUNT } from '../../app/constants'
  * From the body tag, recursively sorts tags on text content length and replaces all tags
  * with their children until @const MAX_SEQUENCE_COUNT limit is reached
  */
-export default function extractNodes(rootNode) {
+export function extractNodes(rootNode) {
     const INVALID_TAG_NAMES = ["SCRIPT", "NOSCRIPT", "HTML"]
   
     const getRelevantChildren = node => {
