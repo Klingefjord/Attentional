@@ -72,7 +72,7 @@ var labels;
  * otherwise calls the @function api with them
  * updates the 
  */
-function updateNodes(nodes) {
+async function updateNodes(nodes) {
   const pendingApi = {}
   const existing = {}
   for (const node of nodes) {
@@ -94,10 +94,6 @@ function updateNodes(nodes) {
       ...apiResults
     }
 
-    console.log("api results ", apiResults)
-    console.log("existing results ", existing)
-    console.log("combined results ", results)
-
     // Store results in cache
     cache = {
       ...cache,
@@ -112,7 +108,6 @@ function updateNodes(nodes) {
  * Either hides or shows @param entries depending on the hide and override properties in the `entry.decision` object
  */
 function render(entries) {
-  console.log("time to render: ", entries)
   for (const [key, val] of Object.entries(entries)) {
     const decision = val.decision
     if (!decision) continue

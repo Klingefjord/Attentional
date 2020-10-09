@@ -7,7 +7,8 @@ import {
 } from "../../../../utils/env"
 
 /**
- * Calls the /classify api with the @param sequences and labels from chrome storage
+ * Calls the `/classify` api with the @param sequences and @param labels provided 
+ * and maps the result to the `entry` type
  * 
  * --- api object: ---
  * {
@@ -53,7 +54,6 @@ export async function classify(sequences, labels) {
 }
 
 const convertToCacheObject = (response, labels) => {
-    console.log("Response from api is ", response)
     Object.keys(response).map((key, idx) => {
         response[key] = {
             classificationResults: {
@@ -65,6 +65,5 @@ const convertToCacheObject = (response, labels) => {
         }
     })
 
-    console.log("Mapped response is ", response)
     return response
 }
