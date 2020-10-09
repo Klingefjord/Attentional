@@ -1,5 +1,5 @@
 // Triggered from the `ShowHiddenContentView` when a hidden element is supposed to be shown
-export const SHOW_ELEMENT = "show_element"
+export const UPDATE_HIDDEN = "update_override"
 
 // Triggered when the user adds or removes a label
 export const LABEL_UPDATE = "label_update"

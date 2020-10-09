@@ -27,7 +27,9 @@ import {
   getLabels
 } from "../../chromeStorage"
 import {
-  LABEL_UPDATE as LABEL_UPDATE
+  LABEL_UPDATE,
+  FETCH_HIDDEN,
+  UPDATE_HIDDEN
 } from "../../messages";
 
 /**
@@ -39,9 +41,8 @@ import {
  *        "label2"(string): score(float)
  *      },
  *     "decision": {
- *       "hide": true|false,
- *       "override": true|false
- *     }
+ *       "hide": true|false
+ *     } (optional)
  *   },
  *   "key2": ...
  * }
@@ -105,14 +106,11 @@ async function updateNodes(nodes) {
 }
 
 /**
- * Either hides or shows @param entries depending on the hide and override properties in the `entry.decision` object
+ * Either hides or shows @param entries depending on the hide property in the `entry.decision` object
  */
 function render(entries) {
   for (const [key, val] of Object.entries(entries)) {
-    const decision = val.decision
-    if (!decision) continue
-    const hide = decision.override ? decision.override : decision.hide
-    const setDisplayProperty = node => node.style.display = hide ? 'none' : ''
+    const setDisplayProperty = node => node.style.display = val.decision && val.decision.hide ? 'none' : ''
     Array.from(document.getElementsByClassName(key)).forEach(setDisplayProperty)
   }
 }
@@ -146,9 +144,15 @@ function handleFetchHidden(msg, response) {
   const hidden = []
   Object.keys(cache)
     .map(key => {
-      if (cache[key].decision && (cache[key].decision.override || cache[key].decision.hide)) {
+      const classifcationResults = cache[key].classificationResults
+      const decision = cache[key].decision
+      if (classifcationResults && decision) {
+        const classifcationResults = cache[key].classificationResults
+        const maxLabel = Object.keys(classifcationResults).reduce((a, b) => classificationResults[a] > classificationResults[b] ? a : b)
         hidden.push({
           key: key,
+          hide: decision.hide,
+          reason: `${maxLabel} (${Math.round(classifcationResults[maxLabel] * 100)}% certainty)`,
           text: [...document.getElementsByClassName(key)].map(nodeText)[0]
         })
       }
@@ -159,18 +163,18 @@ function handleFetchHidden(msg, response) {
   })
 }
 
-function handleShowElement(msg, response) {
+function handleSetHidden(msg, response) {
   const key = msg.key
-  const entry = cache[key]
-  if (!entry) {
+  if (!cache[key]) {
+    console.log("Try to set an override for element not in cache")
     sendResponse(false)
     return
   }
-  cache[key] = {
-    ...entry,
-    override: true
+  cache[key].decision = {
+    ...cache[key].decision,
+    hide: msg.hide
   }
-  render([entry])
+  render({[key]: cache[key]})
   response(true)
 }
 
@@ -179,7 +183,7 @@ chrome.extension.onMessage.addListener((msg, sender, sendResponse) => {
     handleLabelUpdate(msg, sendResponse)
   } else if (msg.action === FETCH_HIDDEN) {
     handleFetchHidden(msg, sendResponse)
-  } else if (msg.action === SHOW_ELEMENT) {
-    handleShowElement(msg, response)
+  } else if (msg.action === UPDATE_HIDDEN) {
+    handleUpdateHidden(msg, sendResponse)
   }
 })

@@ -29,7 +29,7 @@ import {
  *     }, 
  *     "decision": {
  *       "hide": true|false,
- *       "override": true|false
+ *       "hide_override": true|false|null
  *     }
  *   },
  *   ...
@@ -55,14 +55,19 @@ export async function classify(sequences, labels) {
 
 const convertToCacheObject = (response, labels) => {
     Object.keys(response).map((key, idx) => {
+        const hide = Object.keys(response[key]).some(label => response[key][label] >= OBSCURE_THRESHOLD && labels.includes(label))
         response[key] = {
             classificationResults: {
                 ...response[key]
-            },
-            decision: {
-                hide: Object.keys(response[key]).some(label => response[key][label] >= OBSCURE_THRESHOLD && labels.includes(label))
             }
         }
+        if (hide) {
+            response[key].decision = {
+                hide: true
+            }
+        }
+
+        console.log("Converted to cache object", response[key])
     })
 
     return response
