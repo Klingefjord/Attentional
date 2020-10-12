@@ -56,7 +56,6 @@ const ShowHiddenContentView = props => {
   }
 
   const renderHiddenContent = hiddenContent => {
-    console.log(hiddenContent)
     return <li key={hiddenContent.key}>
       <h3>{hiddenContent.reason}</h3>
       <p>{hiddenContent.text}</p>

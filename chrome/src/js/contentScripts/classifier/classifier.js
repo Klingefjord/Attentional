@@ -84,7 +84,7 @@ async function updateNodes(nodes) {
       nodesExistingInCache[key] = cache[key]
     } else {
       node.classList.add(key)
-      nodesPendingClassification[key] = chunkify(nodeText(node), MAX_TEXT_LENGTH)
+      nodesPendingClassification[key] = nodeText(node).slice(0, MAX_TEXT_LENGTH)
     }
   }
 
@@ -169,7 +169,6 @@ function handleFetchHidden(msg, response) {
 function handleUpdateHidden(msg, response) {
   const key = msg.key
   if (!cache[key]) {
-    console.log("Try to set an override for element not in cache")
     sendResponse(false)
     return
   }
