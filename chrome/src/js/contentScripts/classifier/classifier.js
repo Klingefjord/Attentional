@@ -74,34 +74,35 @@ var labels;
  * updates the 
  */
 async function updateNodes(nodes) {
-  const pendingApi = {}
-  const existing = {}
+  const nodesPendingClassification = {}
+  const nodesExistingInCache = {}
   for (const node of nodes) {
     const key = nodeKey(node)
 
     if (cache[key]) {
       node.classList.add(key)
-      existing[key] = cache[key]
+      nodesExistingInCache[key] = cache[key]
     } else {
       node.classList.add(key)
-      pendingApi[key] = chunkify(nodeText(node), MAX_TEXT_LENGTH)
+      nodesPendingClassification[key] = chunkify(nodeText(node), MAX_TEXT_LENGTH)
     }
   }
 
   // classify using api and merge with cached results
-  return classify(pendingApi, labels).then(apiResults => {
-    const results = {
-      ...existing,
-      ...apiResults
-    }
-
-    // Store results in cache
+  return classify(nodesPendingClassification, labels).then(classifiedNodes => {
+    // Store newly classified nodes in cache
     cache = {
       ...cache,
-      ...results
+      ...classifiedNodes
     }
 
-    return results
+    return {
+      ...nodesExistingInCache,
+      ...classifiedNodes
+    }
+  }).catch(error => {
+    console.error(error)
+    return
   })
 }
 
@@ -148,14 +149,14 @@ function handleFetchHidden(msg, response) {
       const decision = cache[key].decision
       if (classificationResults && decision) {
         const maxLabel = Object.keys(classificationResults).reduce((a, b) => classificationResults[a] > classificationResults[b] ? a : b)
-        const text = [...document.getElementsByClassName(key)].map(nodeText).sort((a,b) => a.length - b.length)[0]
+        const text = [...document.getElementsByClassName(key)].map(nodeText).sort((a, b) => a.length - b.length)[0]
         if (classificationResults && maxLabel && text) {
           hidden.push({
             key: key,
             hide: decision.hide,
             reason: `${maxLabel} (${Math.round(classificationResults[maxLabel] * 100)}% certainty)`,
             text: text
-          }) 
+          })
         }
       }
     })
@@ -176,7 +177,9 @@ function handleUpdateHidden(msg, response) {
     ...cache[key].decision,
     hide: msg.hide
   }
-  render({[key]: cache[key]})
+  render({
+    [key]: cache[key]
+  })
   response(true)
 }
 
