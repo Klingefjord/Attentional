@@ -1,7 +1,7 @@
 import { MIN_TEXT_LENGTH } from '../../constants'
 
 export function nodeText(node) {
-    return cleanText(node.innerText ? node.innerText : node.textContent)
+    return cleanText(node.textContent)
 }
   
 export function nodeKey(node) {
@@ -13,11 +13,11 @@ export function isValidTextNode(node) {
 }
 
 export function cleanText(str) {
-    return str.replace(/\s\s+/g, " ").replace("↵", " ").replace("\n", " ").toLowerCase();
+    return str.replace(/[\n\r]+|[\s]{2,}/g, " ").toLowerCase();
 }
 
 export function isValidStr(str, minLength) {
-    return str && /[a-zA-Z]/.test(str) && str.replace(/\s\s+/g, " ").length >= minLength
+    return str && /[a-zA-Z]/.test(str) && str.replace(/[\n\r]+|[\s]{2,}/g, " ").length >= minLength
 }
 
 /**

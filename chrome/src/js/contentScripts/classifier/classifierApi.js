@@ -66,8 +66,6 @@ const convertToCacheObject = (response, labels) => {
                 hide: true
             }
         }
-
-        console.log("Converted to cache object", response[key])
     })
 
     return response

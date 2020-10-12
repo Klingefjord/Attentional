@@ -61,8 +61,8 @@ var labels;
     const bodyNode = document.getElementsByTagName("body")[0]
     const initialNodes = extractNodes(bodyNode)
     updateNodes(initialNodes).then(render)
-    registerMutationObserver(bodyNode, labels, nodes => {
-      nodes.forEach(n => n.style.display = 'none')
+    registerMutationObserver(bodyNode, cache, labels, nodes => {
+      nodes.forEach(n => n.style.display = 'hidden')
       updateNodes(nodes).then(render)
     })
   })
@@ -144,17 +144,19 @@ function handleFetchHidden(msg, response) {
   const hidden = []
   Object.keys(cache)
     .map(key => {
-      const classifcationResults = cache[key].classificationResults
+      const classificationResults = cache[key].classificationResults
       const decision = cache[key].decision
-      if (classifcationResults && decision) {
-        const classifcationResults = cache[key].classificationResults
-        const maxLabel = Object.keys(classifcationResults).reduce((a, b) => classificationResults[a] > classificationResults[b] ? a : b)
-        hidden.push({
-          key: key,
-          hide: decision.hide,
-          reason: `${maxLabel} (${Math.round(classifcationResults[maxLabel] * 100)}% certainty)`,
-          text: [...document.getElementsByClassName(key)].map(nodeText)[0]
-        })
+      if (classificationResults && decision) {
+        const maxLabel = Object.keys(classificationResults).reduce((a, b) => classificationResults[a] > classificationResults[b] ? a : b)
+        const text = [...document.getElementsByClassName(key)].map(nodeText).sort((a,b) => a.length - b.length)[0]
+        if (classificationResults && maxLabel && text) {
+          hidden.push({
+            key: key,
+            hide: decision.hide,
+            reason: `${maxLabel} (${Math.round(classificationResults[maxLabel] * 100)}% certainty)`,
+            text: text
+          }) 
+        }
       }
     })
 
@@ -163,7 +165,7 @@ function handleFetchHidden(msg, response) {
   })
 }
 
-function handleSetHidden(msg, response) {
+function handleUpdateHidden(msg, response) {
   const key = msg.key
   if (!cache[key]) {
     console.log("Try to set an override for element not in cache")
