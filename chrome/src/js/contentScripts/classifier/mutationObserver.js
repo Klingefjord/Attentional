@@ -1,14 +1,9 @@
 import {
   isValidTextNode
 } from './utils'
-import {
-  STOP_LISTENING_FOR_MUTATIONS
-} from '../../messages'
 
 // Global state
 var queue = []
-var queueUpdate
-var observer
 
 const QUEUE_INTERVALS = [100, 200, 500, 1000, 2000]
 
@@ -44,16 +39,10 @@ export function registerMutationObserver(rootNode, cache, labels, prepareNodesCa
     }
   }
 
-  observer = new MutationObserver(observationHandler);
+  const observer = new MutationObserver(observationHandler);
 
   // Start observing the target node for configured mutations
   observer.observe(rootNode, config);
-}
-
-export function unregisterMutationObserver() {
-  if (queueUpdate) clearTimeout(queueUpdate)
-  if (observer) observer.disconnect()
-  queue = []
 }
 
 // TODO - FIX!
@@ -77,12 +66,12 @@ const registerUpdateQueue = updateNodes => {
 }
 
 const updateQueue = (updateIndex, updateNodes) => {
-  queueUpdate = setTimeout(() => {
+  setTimeout(() => {
     console.log("Updating, queue is currently ", queue, " idx currently ", updateIndex)
     const queueCopy = [...queue]
     queue = []
     updateNodes(queueCopy)
     // Call this method recursively
-    queueUpdate = updateQueue(++updateIndex, updateNodes)
+    updateQueue(++updateIndex, updateNodes)
   }, interval(updateIndex))
 }

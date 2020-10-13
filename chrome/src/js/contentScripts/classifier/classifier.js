@@ -18,8 +18,7 @@ import {
 } from './classifierApi'
 
 import {
-  registerMutationObserver,
-  unregisterMutationObserver
+  registerMutationObserver
 } from './mutationObserver'
 
 import {
@@ -30,8 +29,7 @@ import {
 import {
   LABEL_UPDATE,
   FETCH_HIDDEN,
-  UPDATE_HIDDEN,
-  RELOAD
+  UPDATE_HIDDEN
 } from "../../messages";
 
 /**
@@ -72,7 +70,7 @@ function bodyNode() {
 }
 
 function startListeningForDOMChanges(rootNode) {
-  const prepareCallback = nodes => nodes.forEach(n => n.style.display = 'hidden')
+  const prepareCallback = nodes => nodes.forEach(n => n.style.display = 'hidden') // TODO, not quite working
   const classifyCallback = nodes => {
     classifyNodes(nodes).then(render)
   }
@@ -193,12 +191,6 @@ function handleUpdateHidden(msg, response) {
   response(true)
 }
 
-function handleReload(msg, response) {
-  unregisterMutationObserver()
-  startListeningForDOMChanges(bodyNode())
-  response(true)
-}
-
 chrome.extension.onMessage.addListener((msg, sender, response) => {
   if (msg.action === LABEL_UPDATE) {
     handleLabelUpdate(msg, response)
@@ -206,7 +198,5 @@ chrome.extension.onMessage.addListener((msg, sender, response) => {
     handleFetchHidden(msg, response)
   } else if (msg.action === UPDATE_HIDDEN) {
     handleUpdateHidden(msg, response)
-  } else if (msg.action === RELOAD) {
-    handleReload(msg, response)
   }
 })
