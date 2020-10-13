@@ -18,7 +18,8 @@ import {
 } from './classifierApi'
 
 import {
-  registerMutationObserver
+  registerMutationObserver,
+  unregisterMutationObserver
 } from './mutationObserver'
 
 import {
@@ -29,7 +30,8 @@ import {
 import {
   LABEL_UPDATE,
   FETCH_HIDDEN,
-  UPDATE_HIDDEN
+  UPDATE_HIDDEN,
+  RELOAD
 } from "../../messages";
 
 /**
@@ -58,22 +60,31 @@ var labels;
   console.log("Running classifier")
   setupCache().then(() => {
     if (labels.length === 0) return
-    const bodyNode = document.getElementsByTagName("body")[0]
-    const initialNodes = extractNodes(bodyNode)
-    updateNodes(initialNodes).then(render)
-    registerMutationObserver(bodyNode, cache, labels, nodes => {
-      nodes.forEach(n => n.style.display = 'hidden')
-      updateNodes(nodes).then(render)
-    })
+    const body = bodyNode()
+    const initialNodes = extractNodes(body)
+    classifyNodes(initialNodes).then(render)
+    startListeningForDOMChanges(body)
   })
 })()
+
+function bodyNode() {
+  return document.getElementsByTagName("body")[0]
+}
+
+function startListeningForDOMChanges(rootNode) {
+  const prepareCallback = nodes => nodes.forEach(n => n.style.display = 'hidden')
+  const classifyCallback = nodes => {
+    classifyNodes(nodes).then(render)
+  }
+  registerMutationObserver(rootNode, cache, labels, prepareCallback, classifyCallback)
+}
 
 /**
  * Checks the cache for @param nodes and add the appropriate class if they exist, 
  * otherwise calls the @function api with them
  * updates the 
  */
-async function updateNodes(nodes) {
+async function classifyNodes(nodes) {
   const nodesPendingClassification = {}
   const nodesExistingInCache = {}
   for (const node of nodes) {
@@ -182,12 +193,20 @@ function handleUpdateHidden(msg, response) {
   response(true)
 }
 
-chrome.extension.onMessage.addListener((msg, sender, sendResponse) => {
+function handleReload(msg, response) {
+  unregisterMutationObserver()
+  startListeningForDOMChanges(bodyNode())
+  response(true)
+}
+
+chrome.extension.onMessage.addListener((msg, sender, response) => {
   if (msg.action === LABEL_UPDATE) {
-    handleLabelUpdate(msg, sendResponse)
+    handleLabelUpdate(msg, response)
   } else if (msg.action === FETCH_HIDDEN) {
-    handleFetchHidden(msg, sendResponse)
+    handleFetchHidden(msg, response)
   } else if (msg.action === UPDATE_HIDDEN) {
-    handleUpdateHidden(msg, sendResponse)
+    handleUpdateHidden(msg, response)
+  } else if (msg.action === RELOAD) {
+    handleReload(msg, response)
   }
 })

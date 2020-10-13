@@ -6,3 +6,6 @@ export const LABEL_UPDATE = "label_update"
 
 // Triggered from the hidden view as a way to fetch content that is currently hidden
 export const FETCH_HIDDEN = "fetch_hidden_content"
+
+// Triggered when we no longer want the classifier to monitor the DOM for changes
+export const RELOAD = "reload"
