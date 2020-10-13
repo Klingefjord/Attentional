@@ -70,7 +70,7 @@ function bodyNode() {
 }
 
 function startListeningForDOMChanges(rootNode) {
-  const prepareCallback = nodes => nodes.forEach(n => n.style.display = 'hidden') // TODO, not quite working
+  const prepareCallback = nodes => nodes.forEach(n => n.style.display = 'none')
   const classifyCallback = nodes => {
     classifyNodes(nodes).then(render)
   }

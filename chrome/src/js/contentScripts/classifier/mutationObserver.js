@@ -29,8 +29,6 @@ export function registerMutationObserver(rootNode, cache, labels, prepareNodesCa
         const addedNodes = [...mutation.addedNodes].filter(isValidTextNode)
         if (addedNodes.length === 0) {
           continue
-        //} else if (parentNodeHasDecision(addedNodes, cache)) {
-        //  continue
         } else {
           prepareNodesCallback(addedNodes)
           queue = queue.concat(addedNodes)
@@ -44,19 +42,6 @@ export function registerMutationObserver(rootNode, cache, labels, prepareNodesCa
   // Start observing the target node for configured mutations
   observer.observe(rootNode, config);
 }
-
-// TODO - FIX!
-// const parentNodeHasDecision = (nodes, cache) => {
-//   const decisionNodes = Object.keys(cache).reduce((acc, curr) => {
-//     if (cache[curr].decision) {
-//       return acc.concat([...document.getElementsByClassName(curr)])
-//     } else {
-//       return acc
-//     }
-//   }, [])
-
-//   return nodes.some(n => decisionNodes.some(dn => dn.contains(n)))
-// }
 
 /// Queue
 const interval = updateIndex => updateIndex < QUEUE_INTERVALS.length ? QUEUE_INTERVALS[updateIndex] : QUEUE_INTERVALS[QUEUE_INTERVALS.length - 1]
