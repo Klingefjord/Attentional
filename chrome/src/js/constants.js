@@ -11,9 +11,10 @@ export const MAX_TEXT_LENGTH = 1024
 export const OBSCURE_THRESHOLD = 0.6
 
 // How often to sync local cache with chrome storage
-export const CACHE_UPDATE_INTERVAL_MILLIS = 20_000
+export const CACHE_UPDATE_INTERVAL_MILLIS = 10_000
 
 /**
  * Content Script IDs
  */
 export const CLASSIFIER_ID = "classifier.bundle.js"
+export const FEATURE_REMOVER_ID = "featureRemover.bundle.js"

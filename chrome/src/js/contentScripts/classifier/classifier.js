@@ -22,8 +22,8 @@ import {
 } from './mutationObserver'
 
 import {
-  getCachedClassificationResults,
-  setCachedClassificationResults,
+  getClassificationResults,
+  setClassificationResults,
   getLabels
 } from "../../chromeStorage"
 import {
@@ -127,7 +127,7 @@ function render(entries) {
 
 /// Cache
 async function setupCache() {
-  return getCachedClassificationResults(window.location.host)
+  return getClassificationResults(window.location.host)
     .then(chromeCache => {
       cache = chromeCache
       setInterval(updateCache, CACHE_UPDATE_INTERVAL_MILLIS)
@@ -139,7 +139,7 @@ async function setupCache() {
 }
 
 function updateCache() {
-  return setCachedClassificationResults(window.location.host, cache)
+  return setClassificationResults(window.location.host, cache)
 }
 
 /// Event listeners

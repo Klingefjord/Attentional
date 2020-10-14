@@ -1,14 +1,36 @@
 const LABELS_CACHE_KEY = "labels"
 const CLASSIFICATION_CACHE_KEY = "clf_cache"
+const REMOVED_FEATURES_CACHE_KEY = "rm_feat"
 
 const classificationKey = host => `${CLASSIFICATION_CACHE_KEY}__${host}`
+const removedFeaturesKey = host => `${REMOVED_FEATURES_CACHE_KEY}__${host}`
 
 
 /**
- * Wrapper for chrome storage
- * 
- * Might have to change this to `chrome.storage.local` eventually, as .sync only allows 104KB whereas .local allows 5.2MB
+ * Wrapper for chrome storage 
  */
+
+function get(key, fallback) {
+    return new Promise((resolve, reject) => {
+        chrome.storage.local.get([key], result => {
+            const error = chrome.runtime.lastError;
+            if (error) reject(error)
+            resolve(result[key] ? result[key] : fallback)
+        })
+    })
+}
+
+function set(key, data) {
+    return new Promise((resolve, reject) => {
+        chrome.storage.local.set({
+            [key]: data
+        }, () => {
+            const error = chrome.runtime.lastError
+            if (error) reject(error)
+            resolve()
+        })
+    })
+}
 
 export function clear() {
     return new Promise((resolve, reject) => {
@@ -20,49 +42,11 @@ export function clear() {
     })
 }
 
-export function getLabels() {
-    return new Promise((resolve, reject) => {
-        const key = LABELS_CACHE_KEY
-        chrome.storage.local.get([key], result => {
-            const error = chrome.runtime.lastError;
-            if (error) reject(error)
-            resolve(result[key] ? result[key] : [])
-        })
-    })
-}
+export const getLabels = () => get(LABELS_CACHE_KEY, [])
+export const setLabels = labels => set(LABELS_CACHE_KEY, labels)
 
-export function setLabels(labels) {
-    return new Promise((resolve, reject) => {
-        chrome.storage.local.set({
-            [LABELS_CACHE_KEY]: labels
-        }, () => {
-            const error = chrome.runtime.lastError;
-            if (error) reject(error)
-            resolve()
-        })
-    })
-}
+export const getClassificationResults = host => get(classificationKey(host), {})
+export const setClassificationResults = (host, data) => set(classificationKey(host, data))
 
-export function getCachedClassificationResults(host) {
-    const key = classificationKey(host)
-    return new Promise((resolve, reject) => {
-        chrome.storage.local.get([key], result => {
-            const error = chrome.runtime.lastError
-            if (error) reject(error)
-            resolve(result[key] ? result[key] : {})
-        })
-    })
-}
-
-export function setCachedClassificationResults(host, classificationCache) {
-    const key = classificationKey(host)
-    return new Promise((resolve, reject) => {
-        chrome.storage.local.set({
-            [key]: classificationCache
-        }, () => {
-            const error = chrome.runtime.lastError
-            if (error) reject(error)
-            resolve()
-        })
-    })
-}
+export const getRemovedFeatures = host => get(removedFeaturesKey(host), [])
+export const setRemovedFeatures = (host, data) => set(removedFeaturesKey(host), data)
