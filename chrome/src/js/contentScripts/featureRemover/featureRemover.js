@@ -4,8 +4,9 @@ import {
   REMOVE_SELECTED,
   FETCH_REMOVED,
   UNDO_REMOVED,
-  SHOW_REMOVED, 
-  HIDE_REMOVED 
+  SHOW_REMOVED,
+  HIDE_REMOVED,
+  REMOVE_MODAL
 } from '../../messages';
 
 import {
@@ -17,6 +18,10 @@ import {
   cssPath
 } from "./utils";
 
+import {
+  modal
+} from './modal'
+
 var cache;
 var selectedElement;
 
@@ -25,9 +30,13 @@ var selectedElement;
     .then(hideElementsFromCache)
     .then(() => {
       setupEventListener()
-      registerMutationObserver(document.getElementsByTagName("body")[0])
+      registerMutationObserver(body())
     })
 })()
+
+function body() {
+  return document.getElementsByTagName("body")[0]
+}
 
 async function hideElementsFromCache() {
   for (const selector of cache) {
@@ -86,6 +95,40 @@ function handleElementRemoval(msg, response) {
   syncCache().then(() => response(true))
 }
 
+function handleRemoveModal(msg, response) {
+  if (!selectedElement) {
+    response(false)
+    return
+  }
+
+  const relevantNodes = [selectedElement]
+  const bodyNode = body()
+
+  const addParentRecursively = node => {
+    if (!bodyNode.isEqualNode(node) 
+    && node.parentElement 
+    && relevantNodes.length < 10) {
+      relevantNodes.push(node.parentElement)
+      addParentRecursively(node.parentElement)
+    }
+  }
+
+  addParentRecursively(selectedElement)
+
+  const finishCallback = node => {
+    removeElement(node)
+    document.getElementById('attn_granularity-modal-menu').remove()
+    cache = [...cache, cssPath(node)]
+    syncCache()
+  }
+
+  const cancelCallback = () => {
+    document.getElementById('attn_granularity-modal-menu').remove()
+  }
+
+  bodyNode.insertBefore(modal(relevantNodes, finishCallback, cancelCallback), bodyNode.firstChild)
+}
+
 function handleFetchRemoved(msg, response) {
   response(cache)
 }
@@ -123,7 +166,9 @@ function handleHideRemoved(msg, response) {
 }
 
 chrome.extension.onMessage.addListener((msg, sender, response) => {
-  if (msg.action === REMOVE_SELECTED) {
+  if (msg.action === REMOVE_MODAL) {
+    handleRemoveModal(msg, response)
+  } else if (msg.action === REMOVE_SELECTED) {
     handleElementRemoval(msg, response)
   } else if (msg.action === FETCH_REMOVED) {
     handleFetchRemoved(msg, response)
