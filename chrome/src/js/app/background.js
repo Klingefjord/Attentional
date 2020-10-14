@@ -4,7 +4,7 @@ import {
 } from '../constants'
 
 import {
-	REMOVE_SELECTED_ELEMENT
+	REMOVE_SELECTED
 } from "../messages";
 
 chrome.webNavigation.onDOMContentLoaded.addListener(function (details) {
@@ -28,7 +28,7 @@ chrome.contextMenus.create({
 chrome.contextMenus.onClicked.addListener(function (data, tab) {
 	if (data.menuItemId === "feature_remover") {
 		chrome.tabs.sendMessage(tab.id, {
-			action: REMOVE_SELECTED_ELEMENT
+			action: REMOVE_SELECTED
 		}, response => {
 			const error = chrome.runtime.lastError;
 			if (error) reject(error)

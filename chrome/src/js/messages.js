@@ -1,11 +1,11 @@
-// Triggered from the `ShowHiddenContentView` when a hidden element is supposed to be shown
-export const UPDATE_HIDDEN = "update_override"
+// Classifier
+export const UPDATE_HIDDEN   = "update_override"
+export const LABEL_UPDATE    = "label_update"
+export const FETCH_HIDDEN    = "fetch_hidden_content"
 
-// Triggered when the user adds or removes a label
-export const LABEL_UPDATE = "label_update"
-
-// Triggered from the hidden view as a way to fetch content that is currently hidden
-export const FETCH_HIDDEN = "fetch_hidden_content"
-
-// Triggered from context menu when user clicks "Remove element"
-export const REMOVE_SELECTED_ELEMENT = "remove_selected_el"
+// Element Removal
+export const REMOVE_SELECTED = "remove_selected_el"
+export const FETCH_REMOVED   = "fetch_removed_features"
+export const UNDO_REMOVED    = "undo_removed"
+export const SHOW_REMOVED    = "show_removed_feature"
+export const HIDE_REMOVED    = "hide_removed_feature"

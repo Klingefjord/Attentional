@@ -1,7 +1,11 @@
 import regeneratorRuntime from "regenerator-runtime";
 
 import {
-  REMOVE_SELECTED_ELEMENT
+  REMOVE_SELECTED,
+  FETCH_REMOVED,
+  UNDO_REMOVED,
+  SHOW_REMOVED, 
+  HIDE_REMOVED 
 } from '../../messages';
 
 import {
@@ -17,7 +21,7 @@ var cache;
 var selectedElement;
 
 (function () {
-  updateCache()
+  setupCache()
     .then(hideElementsFromCache)
     .then(() => {
       setupEventListener()
@@ -64,28 +68,70 @@ function registerMutationObserver(rootNode) {
 }
 
 /// Cache
-async function updateCache() {
+async function setupCache() {
   return getRemovedFeatures(window.location.host)
     .then(removedFeatures => {
       cache = removedFeatures
     })
 }
+async function syncCache() {
+  return setRemovedFeatures(window.location.host, cache)
+}
 
 /// Event listeners
 function handleElementRemoval(msg, response) {
-  getRemovedFeatures(window.location.host)
-    .then(cache => setRemovedFeatures(window.location.host, [...cache, cssPath(selectedElement)]))
-    .then(updateCache)
-    .then(() => {
-      cache
-      removeElement(selectedElement)
-      selectedElement = null
-    })
-    .then(() => response(true))
+  cache = [...cache, cssPath(selectedElement)]
+  removeElement(selectedElement)
+  selectedElement = null
+  syncCache().then(() => response(true))
+}
+
+function handleFetchRemoved(msg, response) {
+  response(cache)
+}
+
+function handleUndoRemove(msg, response) {
+  const index = cache.indexOf(msg.key)
+  const element = document.querySelector(msg.key)
+  if (index === -1 || !element) {
+    response(false)
+  } else {
+    cache.splice(index, 1)
+    element.style.display = ''
+    syncCache().then(() => response(true))
+  }
+}
+
+function handleShowRemoved(msg, response) {
+  const element = document.querySelector(msg.key)
+  if (!element) {
+    response(false)
+  } else {
+    element.style.display = ''
+    response(true)
+  }
+}
+
+function handleHideRemoved(msg, response) {
+  const element = document.querySelector(msg.key)
+  if (!element) {
+    response(false)
+  } else {
+    element.style.display = 'none'
+    response(true)
+  }
 }
 
 chrome.extension.onMessage.addListener((msg, sender, response) => {
-  if (msg.action === REMOVE_SELECTED_ELEMENT) {
+  if (msg.action === REMOVE_SELECTED) {
     handleElementRemoval(msg, response)
+  } else if (msg.action === FETCH_REMOVED) {
+    handleFetchRemoved(msg, response)
+  } else if (msg.action === UNDO_REMOVED) {
+    handleUndoRemove(msg, response)
+  } else if (msg.action === SHOW_REMOVED) {
+    handleShowRemoved(msg, response)
+  } else if (msg.action === HIDE_REMOVED) {
+    handleHideRemoved(msg, response)
   }
 })

@@ -1,8 +1,9 @@
+import regeneratorRuntime from "regenerator-runtime";
+
 import React, {
   useState,
   useEffect
 } from 'react'
-import regeneratorRuntime from "regenerator-runtime";
 
 import {
   UPDATE_HIDDEN,
@@ -70,7 +71,7 @@ const ShowHiddenContentView = props => {
     }
 
     load()
-  }, []);
+  }, [])
 
   return (
     <div>
