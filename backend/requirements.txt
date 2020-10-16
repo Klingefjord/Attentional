@@ -1,9 +1,24 @@
+#Flask
 click==7.1.2
 Flask==1.1.1
 itsdangerous==1.1.0
 Jinja2==2.11.2
 MarkupSafe==1.1.1
 Werkzeug==1.0.1
+
+# db
+SQLAlchemy
+Flask-SQLAlchemy
+Flask-Migrate
+Flask_Script
+psycopg2
+
+# ml
 numpy
 torch
 transformers
+
+# Selenium
+bs4
+selenium
+webdriver-manager

@@ -1,4 +1,5 @@
 import { MIN_TEXT_LENGTH } from '../../constants'
+const crypto = require('crypto')
 
 export function nodeText(node) {
     return cleanText(node.innerText)
@@ -40,10 +41,8 @@ export function unixTimestamp() {
     return Math.round(new Date().getTime())
 }
 
-export function hashCode(str) {
-    let h;
-    for(let i = 0; i < str.length; i++) 
-          h = Math.imul(31, h) + str.charCodeAt(i) | 0;
-
-    return h;
+function hashCode(str) {
+    let shasum = crypto.createHash('sha1')
+    shasum.update(str)
+    return shasum.digest('hex')
 }

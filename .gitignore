@@ -5,4 +5,7 @@
 /chrome/secrets.*.js
 /chrome/yarn.lock
 /backend/.vscode/
+backend/parser/__init__.py
+__pycache__
+/backend/migrations
 /backend/__pycache__/

@@ -1,34 +1,53 @@
 from flask import Flask, request, jsonify
-from transformers import pipeline
-import numpy as np
-import time
+from parser import parser
+from classifier import classify
+from flask_sqlalchemy import SQLAlchemy
+
+from flask_script import Manager
+from flask_migrate import Migrate, MigrateCommand
+
+from models import db, ClassificationResult, Label
 
 app = Flask(__name__)
-classifier = pipeline("zero-shot-classification", model="valhalla/distilbart-mnli-12-1")
+
+POSTGRES = {
+    'user': 'postgres',
+    'pw': 'password',
+    'db': 'attentional_dev',
+    'host': 'localhost',
+    'port': '5432',
+}
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://%(user)s:\
+%(pw)s@%(host)s:%(port)s/%(db)s' % POSTGRES
+
+db.init_app(app)
+
 
 @app.route('/')
 def hello():
     return "Hello World!"
 
-@app.route('/classify',  methods=['POST'])
-def classify():
-    """Take a set of labels and a dict of key to text, 
-    and classify each piece of text according to labels
-    """
+@app.route('/labels/update', methods=['POST'])
+def set_labels():
+    """Set the entire set of labels for a user"""
     body = request.json
     labels = body['labels']
-    sequences = body['sequences']
-    start_time = time.time()
-    outputs = classifier([s[1] for s in sequences.items()], labels, multi_class=True)
-    response = {}
-    for i, (key, _) in enumerate(sequences.items()):
-        output = outputs[i] if isinstance(outputs, list) else outputs
-        for label, score in zip(output['labels'], output['scores']):
-            response[key] = { label: score }
-    
-    print(f"Classified request with {len(sequences)} sequences. Took {time.time() - start_time} seconds")
-    print(response)
-    return jsonify(response)
+    db.session.query(Label).delete() # since we don't have users yet, wipe all labels
+    for label in labels: db.session.add(Label(name=label))
+    db.session.commit()
+    return jsonify({})
+
+@app.route('/parse/schedule', methods=['POST'])
+def parse():
+    """Schedule a specified host for parsing"""
+    body = request.json
+    host = body['host']
+    sequences = parser.parse(host)
+    labels = [str(l.name) for l in db.session.query(Label).all()]
+    results = classify(sequences, labels, host)
+    db.session.add_all(results)
+    db.session.commit()
+    return jsonify({})
 
 if __name__ == '__main__':
     app.run(debug=True, threaded=True)
