@@ -10,6 +10,9 @@ export const MAX_TEXT_LENGTH = 1024
 // How certain the classifier has to be that a certain label should be obscured
 export const OBSCURE_THRESHOLD = 0.6
 
+// How much of a text blob needs to pass the @constant OBSCURE_THRESHOLD
+export const TEXT_PERCENTAGE_THRESHOLD = 0.3
+
 // How often to sync local cache with chrome storage
 export const CACHE_UPDATE_INTERVAL_MILLIS = 10_000
 

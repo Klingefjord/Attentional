@@ -124,7 +124,7 @@ function handleUpdateHidden(msg, response) {
   Array.from(document.getElementsByClassName(`attn_obs_${msg.id}`)).forEach(node => {
     node.style.display = msg.hide ? 'none' : ''
   })
-
+  
   response(true)
 }
 
@@ -138,4 +138,4 @@ chrome.extension.onMessage.addListener((msg, sender, response) => {
   }
 })
 
-const removeDuplicateObjects = (arr, key) => arr.filter((v, i, a) => a.findIndex(t => (t[key] === v[key])) === i)
+const removeDuplicateObjects = (arr, key) => arr.filter((v,i,a)=>a.findIndex(t=>(t[key] === v[key]))===i)

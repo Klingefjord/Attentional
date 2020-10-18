@@ -39,13 +39,13 @@ def extract_general(driver, host, scroll_iterations=1):
     sleep(2)
     text = set()
     for _ in range(scroll_iterations):
-        sleep(5)
+        sleep(3)
         html = driver.page_source.encode("utf-8")
         text.update(extract_text_from(html))
         driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
     return text
 
-def extract_from_twitter(driver, scroll_iterations=1):
+def extract_from_twitter(driver, scroll_iterations=5):
     def _login_twitter(driver):
         username_field = driver.find_element_by_name("session[username_or_email]")
         password_field = driver.find_element_by_name("session[password]")
@@ -53,12 +53,12 @@ def extract_from_twitter(driver, scroll_iterations=1):
         password_field.send_keys(twitter_password)
         driver.find_element_by_xpath("//*[@data-testid='LoginForm_Login_Button']").click()
 
-    driver.get("https:twitter.com/klingfjord")
+    driver.get("https:twitter.com")
     sleep(2)
-    #_login_twitter(driver)
+    _login_twitter(driver)
     text = set()
     for _ in range(scroll_iterations):
-        sleep(5)
+        sleep(3)
         html = driver.page_source.encode("utf-8")
         text.update(extract_text_from(html))
         driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
