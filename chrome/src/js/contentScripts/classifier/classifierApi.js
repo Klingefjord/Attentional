@@ -6,7 +6,7 @@ import {
     BASE_URL
 } from "../../../../utils/env"
 
-/**
+/** 
  * Calls the `/classify` api with the @param sequences and @param labels provided 
  * and maps the result to the `entry` type
  * 
@@ -35,6 +35,7 @@ import {
  *   ...
  * }
  */
+// DEPRECATED
 export async function classify(sequences, labels) {
     if (Object.keys(sequences).length === 0) return {}
     if (labels.length === 0) throw new Error("Need to add at least one label")
@@ -50,23 +51,61 @@ export async function classify(sequences, labels) {
                 labels: labels
             })
         }).then(response => response.json())
-        .then(responseBody => convertToCacheObject(responseBody, labels))
+        .then(response => {
+            Object.keys(response).map((key, idx) => {
+                const hide = Object.keys(response[key]).some(label => response[key][label] >= OBSCURE_THRESHOLD && labels.includes(label))
+                response[key] = {
+                    classificationResults: {
+                        ...response[key]
+                    }
+                }
+                if (hide) {
+                    response[key].decision = {
+                        hide: true
+                    }
+                }
+            })
+
+            return response
+        })
 }
 
-const convertToCacheObject = (response, labels) => {
-    Object.keys(response).map((key, idx) => {
-        const hide = Object.keys(response[key]).some(label => response[key][label] >= OBSCURE_THRESHOLD && labels.includes(label))
-        response[key] = {
-            classificationResults: {
-                ...response[key]
-            }
-        }
-        if (hide) {
-            response[key].decision = {
-                hide: true
-            }
-        }
-    })
-
-    return response
+export async function getClassificationResultForHost(host, labels) {
+    return fetch(`${BASE_URL}/content`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Access-Control-Allow-Origin": "*",
+            },
+            body: JSON.stringify({
+                "host": host,
+                "labels": labels
+            })
+        }).then(response => response.json())
+        .then(body => body.results)
 }
+
+/**
+ * 
+ * @param response
+ * {
+ *   "results": [
+ *     {
+ *       "sequence_hash": string
+ *       "score": float
+ *       "host": string
+ *       "label": string
+ *     },
+ *     { ... },
+ *     ...
+ *   ]
+ * } 
+ */
+// const setShouldHide = (response) =>
+//     response.results.map(result => {
+//         result.decision = {
+//             hide: result.score >= OBSCURE_THRESHOLD
+//         }
+
+//         return result
+//     })

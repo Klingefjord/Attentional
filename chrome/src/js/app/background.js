@@ -1,5 +1,6 @@
 import {
-	CLASSIFIER_ID,
+	RUNTIME_CLASSIFIER_ID,
+	SERVER_CLASSIFIER_ID,
 	FEATURE_REMOVER_ID
 } from '../constants'
 
@@ -12,6 +13,11 @@ chrome.webNavigation.onDOMContentLoaded.addListener(function (details) {
 		// chrome.tabs.executeScript(details.tabId, {
 		// 	file: CLASSIFIER_ID
 		// })
+		
+
+		chrome.tabs.executeScript(details.tabId, {
+			file: SERVER_CLASSIFIER_ID
+		})
 
 		chrome.tabs.executeScript(details.tabId, {
 			file: FEATURE_REMOVER_ID

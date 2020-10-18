@@ -10,7 +10,6 @@ import {
   FETCH_HIDDEN
 } from '../../messages'
 
-
 const ShowHiddenContentView = props => {
   const [hiddenContentList, setHiddenContentList] = useState([])
 
@@ -24,7 +23,7 @@ const ShowHiddenContentView = props => {
       }, response => {
         const error = chrome.runtime.lastError;
         if (error) reject(error)
-        resolve(response.hidden)
+        resolve(response.hiddenContent)
       })
     })
   })
@@ -37,8 +36,8 @@ const ShowHiddenContentView = props => {
       }, tabs => {
         chrome.tabs.sendMessage(tabs[0].id, {
           action: UPDATE_HIDDEN,
-          key: hiddenContent.key,
-          hide: !hiddenContent.hide
+          id: hiddenContent.id,
+          hide: !hiddenContent.hidden
         }, response => {
           const error = chrome.runtime.lastError;
           if (error) reject(error)
@@ -57,10 +56,10 @@ const ShowHiddenContentView = props => {
   }
 
   const renderHiddenContent = hiddenContent => {
-    return <li key={hiddenContent.key}>
+    return <li key={hiddenContent.id}>
       <h3>{hiddenContent.reason}</h3>
       <p>{hiddenContent.text}</p>
-      <button onClick={e => updateHiddenContent(hiddenContent)}>{hiddenContent.hide ? "Show" : "Hide"}</button>
+      <button onClick={e => updateHiddenContent(hiddenContent)}>{hiddenContent.hidden ? "Show" : "Hide"}</button>
     </li>
   }
 

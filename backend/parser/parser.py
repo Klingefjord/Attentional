@@ -53,9 +53,9 @@ def extract_from_twitter(driver, scroll_iterations=1):
         password_field.send_keys(twitter_password)
         driver.find_element_by_xpath("//*[@data-testid='LoginForm_Login_Button']").click()
 
-    driver.get("https:twitter.com")
+    driver.get("https:twitter.com/klingfjord")
     sleep(2)
-    _login_twitter(driver)
+    #_login_twitter(driver)
     text = set()
     for _ in range(scroll_iterations):
         sleep(5)

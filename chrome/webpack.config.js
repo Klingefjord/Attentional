@@ -24,7 +24,8 @@ var options = {
   mode: process.env.NODE_ENV || "development",
   entry: {
     app: path.join(__dirname, "src", "static", "index.js"),	  
-    classifier: path.join(__dirname, "src", "js", "contentScripts", "classifier", "classifier.js"),
+    runtimeClassifier: path.join(__dirname, "src", "js", "contentScripts", "classifier", "runtimeClassifier.js"),
+    serverClassifier: path.join(__dirname, "src", "js", "contentScripts", "classifier", "serverClassifier.js"),
     featureRemover: path.join(__dirname, "src", "js", "contentScripts", "featureRemover", "featureRemover.js"),
     options: path.join(__dirname, "src", "js", "app", "options.js"),
     background: path.join(__dirname, "src", "js", "app", "background.js")

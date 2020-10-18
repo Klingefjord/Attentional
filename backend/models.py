@@ -1,11 +1,12 @@
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import relationship
+from sqlalchemy_serializer import SerializerMixin
 import datetime
 
 db = SQLAlchemy()
 
-class BaseModel(db.Model):
+class BaseModel(db.Model, SerializerMixin):
     """Base data model for all objects"""
     __abstract__ = True
 
@@ -16,29 +17,36 @@ class BaseModel(db.Model):
         """Define a base way to print models"""
         return '%s(%s)' % (self.__class__.__name__, {
             column: value
-            for column, value in self._to_dict().items()
+            for column, value in self.to_dict().items()
         })
 
     def json(self):
         """Define a base way to jsonify models, dealing with datetime objects"""
         return {
             column: value if not isinstance(value, datetime.date) else value.strftime('%Y-%m-%d')
-            for column, value in self._to_dict().items()
+            for column, value in self.to_dict().items()
         }
 
-class ClassificationResult(db.Model):
+class ClassificationResult(BaseModel):
     """The result after a classification"""
     __tablename__ = 'classification_result'
-
-    id = db.Column(db.Integer(), primary_key = True)
-    label = db.Column(db.String(), ForeignKey('label.name', ondelete='CASCADE'))
+    serialize_only=('id', 'label', 'score', 'sequence_hash', 'host')
+    id = db.Column(db.Integer(), primary_key=True)
+    label = db.Column(db.String()) #ForeignKey('label.name', ondelete='CASCADE'), primary_key=True)
     score = db.Column(db.Float())
     sequence_hash = db.Column(db.String())
-    host = db.Column(db.String())
+    host = db.Column(db.String())#, ForeignKey('host.name', ondelete='CASCADE'))
 
-class Label(db.Model):
-    """Label unique to a user"""
-    __tablename__ = 'label'
-    name = db.Column(db.String(), primary_key = True)
-    # user_id = db.column(db.Integer()) # todo
-    child = relationship('ClassificationResult', backref='labeliscious', passive_deletes=True)
+# class Label(BaseModel):
+#     """Label unique to a user"""
+#     __tablename__ = 'label'
+#     name = db.Column(db.String(), primary_key = True)
+#     # user_id = db.column(db.Integer()) # todo
+#     child = relationship('ClassificationResult', backref='label_backref', passive_deletes=True)
+
+# class Host(BaseModel):
+#     """Host unique to a user"""
+#     __tablename__ = 'host'
+#     name = db.Column(db.String(), primary_key = True)
+#     # user_id = db.column(db.Integer()) # todo
+#     child = relationship('ClassificationResult', backref='host_backref', passive_deletes=True)

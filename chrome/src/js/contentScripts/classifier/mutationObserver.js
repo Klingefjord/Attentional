@@ -13,25 +13,24 @@ const QUEUE_INTERVALS = [100, 200, 500, 1000, 2000]
  * The @param callback is called according to @constant QUEUE_INTERVALS 
  * with nodes currently living in @var queue
  */
-export function registerMutationObserver(rootNode, cache, labels, prepareNodesCallback, classifyNodesCallback) {
+export function registerMutationObserver(rootNode, throttle, addedNodesCallback, queueActionCallback) {
   const config = {
     attributes: false,
     childList: true,
     subtree: true
   }
 
-  registerUpdateQueue(classifyNodesCallback)
+  if (throttle) registerUpdateQueue(queueActionCallback)
 
   const observationHandler = (mutationsList, observer) => {
-    if (labels.length === 0) return
     for (const mutation of mutationsList) {
       if (mutation.type === 'childList' && mutation.addedNodes && mutation.addedNodes.length > 0) {
         const addedNodes = [...mutation.addedNodes].filter(isValidTextNode)
         if (addedNodes.length === 0) {
           continue
         } else {
-          prepareNodesCallback(addedNodes)
-          queue = queue.concat(addedNodes)
+          addedNodesCallback(addedNodes)
+          if (throttle) queue = queue.concat(addedNodes)
         }
       }
     }
@@ -43,7 +42,7 @@ export function registerMutationObserver(rootNode, cache, labels, prepareNodesCa
   observer.observe(rootNode, config);
 }
 
-/// Queue
+/// Queue (only enabled if throttling=True)
 const interval = updateIndex => updateIndex < QUEUE_INTERVALS.length ? QUEUE_INTERVALS[updateIndex] : QUEUE_INTERVALS[QUEUE_INTERVALS.length - 1]
 
 const registerUpdateQueue = updateNodes => {

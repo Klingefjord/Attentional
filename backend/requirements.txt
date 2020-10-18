@@ -12,6 +12,7 @@ Flask-SQLAlchemy
 Flask-Migrate
 Flask_Script
 psycopg2
+SQLAlchemy-serializer
 
 # ml
 numpy

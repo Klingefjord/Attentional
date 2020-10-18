@@ -41,7 +41,7 @@ export function unixTimestamp() {
     return Math.round(new Date().getTime())
 }
 
-function hashCode(str) {
+export function hashCode(str) {
     let shasum = crypto.createHash('sha1')
     shasum.update(str)
     return shasum.digest('hex')

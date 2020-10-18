@@ -16,5 +16,6 @@ export const CACHE_UPDATE_INTERVAL_MILLIS = 10_000
 /**
  * Content Script IDs
  */
-export const CLASSIFIER_ID = "classifier.bundle.js"
+export const CLASSIFIER_ID = "runtimeClassifier.bundle.js"
 export const FEATURE_REMOVER_ID = "featureRemover.bundle.js"
+export const SERVER_CLASSIFIER_ID = "serverClassifier.bundle.js"
