@@ -65,11 +65,11 @@ const createSlider = (possibleNodes) => {
 
     slider.oninput = () => {
         possibleNodes.forEach(n => {
-            n.style.display = ''
+            n.hidden = false
         })
 
         const node = currentNode(slider.value, possibleNodes)
-        if (node) node.style.display = 'none'
+        if (node) node.hidden = true
     }
 
     return sliderContainer
@@ -97,7 +97,7 @@ const createCancelButton = (cancelCallback, possibleNodes) => {
 
     button.onclick = _ => {
         possibleNodes.forEach(n => {
-            n.style.display = ''
+            n.hidden = false
         })
 
         cancelCallback()

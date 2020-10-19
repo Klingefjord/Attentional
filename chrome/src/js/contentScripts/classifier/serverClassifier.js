@@ -78,20 +78,42 @@ function render(nodes) {
       return acc
     }, [])
 
-    const highestResult = matchedClassificationResults.reduce((acc, cr) => cr.score > (acc ? acc.score : -1) ? cr : acc, null)
-    const overrideHideValue = classificationResultsOverrides.includes(cr => cr.id === highestResult.id) ?
+    if (matchedClassificationResults.length === 0) return
+    const labels = matchedClassificationResults.reduce((acc, cr) => {
+      if (acc[cr.label]) {
+        acc[cr.label].push(cr)
+      } else {
+        acc[cr.label] = [cr]
+      }
+      return acc
+    }, {})
+
+    let oneLabelPassingThreshold = false
+    let highestLabelScore = 0
+    let highestResult = null
+
+    Object.keys(labels).forEach(label => {
+      const labelScore = labels[label].reduce((acc, cr) => cr.score + acc, 0) / labels[label].length
+      for (const result of labels[label]) {
+        if (highestResult === null || result.score >= highestResult.score) highestResult = result
+      }
+      if (labelScore >= OBSCURE_THRESHOLD) oneLabelPassingThreshold = true
+      if (labelScore >= highestLabelScore) highestLabelScore = labelScore
+    })
+
+    const override = classificationResultsOverrides.includes(cr => cr.id === highestResult.id) ?
       classificationResultsOverrides.find(cr => cr.id === highestResult.id).hide :
       null
 
-    const hide = overrideHideValue === null ? highestResult && highestResult.score >= OBSCURE_THRESHOLD : overrideHideValue
+    const hide = override === null ? oneLabelPassingThreshold : override
     if (hide) {
       node.classList.add("attn_obscured_content")
       node.classList.add(`attn_obs_${highestResult.id}`)
-      node.dataset.attn_reason = `${highestResult.label} (${Math.round(highestResult.score * 100)}% certainty)`
+      node.dataset.attn_reason = `${highestResult.label} (${Math.round(highestLabelScore * 100)}% certainty)`
       node.dataset.attn_id = highestResult.id
-      node.style.display = 'none'
+      node.hidden = true
     } else {
-      node.style.display = ''
+      node.hidden = false
     }
   })
 }
@@ -105,7 +127,7 @@ function handleFetchHidden(msg, response) {
         id: Number(node.dataset.attn_id),
         text: node.textContent,
         reason: node.dataset.attn_reason,
-        hidden: node.style.display === 'none'
+        hidden: node.hidden
       }
     })
   })
@@ -122,7 +144,7 @@ function handleUpdateHidden(msg, response) {
   console.log("Should be one element: ", Array.from(document.getElementsByClassName(`attn_obs_${msg.id}`)))
 
   Array.from(document.getElementsByClassName(`attn_obs_${msg.id}`)).forEach(node => {
-    node.style.display = msg.hide ? 'none' : ''
+    node.hidden = msg.hide
   })
   
   response(true)

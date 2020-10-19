@@ -70,7 +70,7 @@ function bodyNode() {
 }
 
 function startListeningForDOMChanges(rootNode) {
-  const prepareCallback = nodes => nodes.forEach(n => n.style.display = 'none')
+  const prepareCallback = nodes => nodes.forEach(n => { n.hidden = true })
   const classifyCallback = nodes => {
     classifyNodes(nodes).then(render)
   }
@@ -120,7 +120,7 @@ async function classifyNodes(nodes) {
  */
 function render(entries) {
   for (const [key, val] of Object.entries(entries)) {
-    const setDisplayProperty = node => node.style.display = val.decision && val.decision.hide ? 'none' : ''
+    const setDisplayProperty = node => node.hidden = val.decision && val.decision.hide
     Array.from(document.getElementsByClassName(key)).forEach(setDisplayProperty)
   }
 }
