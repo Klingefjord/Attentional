@@ -105,8 +105,8 @@ function handleRemoveModal(msg, response) {
   const bodyNode = body()
 
   const addParentRecursively = node => {
-    if (!bodyNode.isEqualNode(node) 
-    && node.parentElement 
+    if (node.parentElement 
+    && !bodyNode.isSameNode(node.parentElement)
     && relevantNodes.length < 10) {
       relevantNodes.push(node.parentElement)
       addParentRecursively(node.parentElement)
@@ -125,6 +125,8 @@ function handleRemoveModal(msg, response) {
   const cancelCallback = () => {
     document.getElementById('attn_granularity-modal-menu').remove()
   }
+
+  console.log(relevantNodes)
 
   bodyNode.insertBefore(modal(relevantNodes, finishCallback, cancelCallback), bodyNode.firstChild)
 }

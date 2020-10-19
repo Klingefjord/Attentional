@@ -1,4 +1,5 @@
 export const modal = (possibleNodes, finishCallback, cancelCallback) => {
+    console.log("Posssible nodes", possibleNodes)
     const modal = createModal()
     const modalContent = createModalContent()
     const slider = createSlider(possibleNodes)
@@ -14,7 +15,7 @@ export const modal = (possibleNodes, finishCallback, cancelCallback) => {
 
 const createModal = () => {
     const modal = document.createElement('div')
-    modal.setAttribute('id', 'attn-granularity-modal')
+    modal.setAttribute('id', 'attn_granularity-modal-menu')
     modal.classList.add('modal')
     modal.style.cssText = `
             margin: 0;
@@ -49,7 +50,6 @@ const createModalContent = () => {
 }
 
 const createSlider = (possibleNodes) => {
-    possibleNodes = possibleNodes.filter(n => !n.contains(document.getElementById('attn-granularity-modal')))
     const sliderContainer = document.createElement('div')
     sliderContainer.classList.add('slider-container')
     sliderContainer.style.cssText = `margin: 0 auto;`
@@ -77,7 +77,6 @@ const createSlider = (possibleNodes) => {
 }
 
 const createFinishButton = (finishCallback, possibleNodes) => {
-    possibleNodes = possibleNodes.filter(n => !n.contains(document.getElementById('attn-granularity-modal')))
     const button = document.createElement('button')
     button.classList.add('finish-button')
     button.style.cssText = `width: 100%`
@@ -92,7 +91,6 @@ const createFinishButton = (finishCallback, possibleNodes) => {
 }
 
 const createCancelButton = (cancelCallback, possibleNodes) => {
-    possibleNodes = possibleNodes.filter(n => !n.contains(document.getElementById('attn-granularity-modal')))
     const button = document.createElement('button')
     button.classList.add('cancel-button')
     button.style.cssText = `width: 100%;`
