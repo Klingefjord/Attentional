@@ -47,7 +47,7 @@ async function hideElementsFromCache() {
 
 function removeElement(element) {
   if (!element) return
-  element.hidden = true
+  element.style.display = 'none'
 }
 
 function setupEventListener() {
@@ -140,7 +140,7 @@ function handleUndoRemove(msg, response) {
     response(false)
   } else {
     cache.splice(index, 1)
-    element.hidden = false
+    element.style.display = ''
     syncCache().then(() => response(true))
   }
 }
@@ -150,7 +150,7 @@ function handleShowRemoved(msg, response) {
   if (!element) {
     response(false)
   } else {
-    element.hidden = false
+    element.style.display = ''
     response(true)
   }
 }
@@ -160,7 +160,7 @@ function handleHideRemoved(msg, response) {
   if (!element) {
     response(false)
   } else {
-    element.hidden = true
+    element.style.display = 'none'
     response(true)
   }
 }

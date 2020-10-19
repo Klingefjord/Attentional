@@ -58,7 +58,6 @@ const RemoveFeaturesView = props => {
 
   const undoRemove = async featureKey => getActiveTabId()
     .then(tabId => new Promise((resolve, reject) => {
-      console.log("IN undo remove")
       chrome.tabs.sendMessage(tabId, {
         action: UNDO_REMOVED,
         key: featureKey

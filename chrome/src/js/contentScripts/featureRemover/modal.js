@@ -14,7 +14,7 @@ export const modal = (possibleNodes, finishCallback, cancelCallback) => {
 
 const createModal = () => {
     const modal = document.createElement('div')
-    modal.setAttribute('id', 'attn_granularity-modal-menu')
+    modal.setAttribute('id', 'attn-granularity-modal')
     modal.classList.add('modal')
     modal.style.cssText = `
             margin: 0;
@@ -49,6 +49,7 @@ const createModalContent = () => {
 }
 
 const createSlider = (possibleNodes) => {
+    possibleNodes = possibleNodes.filter(n => !n.contains(document.getElementById('attn-granularity-modal')))
     const sliderContainer = document.createElement('div')
     sliderContainer.classList.add('slider-container')
     sliderContainer.style.cssText = `margin: 0 auto;`
@@ -65,17 +66,18 @@ const createSlider = (possibleNodes) => {
 
     slider.oninput = () => {
         possibleNodes.forEach(n => {
-            n.hidden = false
+            n.style.display = ''
         })
 
         const node = currentNode(slider.value, possibleNodes)
-        if (node) node.hidden = true
+        if (node) node.style.display = 'none'
     }
 
     return sliderContainer
 }
 
 const createFinishButton = (finishCallback, possibleNodes) => {
+    possibleNodes = possibleNodes.filter(n => !n.contains(document.getElementById('attn-granularity-modal')))
     const button = document.createElement('button')
     button.classList.add('finish-button')
     button.style.cssText = `width: 100%`
@@ -90,6 +92,7 @@ const createFinishButton = (finishCallback, possibleNodes) => {
 }
 
 const createCancelButton = (cancelCallback, possibleNodes) => {
+    possibleNodes = possibleNodes.filter(n => !n.contains(document.getElementById('attn-granularity-modal')))
     const button = document.createElement('button')
     button.classList.add('cancel-button')
     button.style.cssText = `width: 100%;`
@@ -97,7 +100,7 @@ const createCancelButton = (cancelCallback, possibleNodes) => {
 
     button.onclick = _ => {
         possibleNodes.forEach(n => {
-            n.hidden = false
+            n.style.display = ''
         })
 
         cancelCallback()
