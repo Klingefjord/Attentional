@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify
+from classifier import Classifier
 from parser import parser
-from classifier import classify
 from flask_sqlalchemy import SQLAlchemy
 
 from flask_script import Manager
@@ -26,6 +26,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://%(user)s:\
 %(pw)s@%(host)s:%(port)s/%(db)s' % POSTGRES
 
 db.init_app(app)
+classifier = Classifier()
 
 
 @app.route('/')
@@ -60,7 +61,7 @@ def parse():
     labels = body['labels']
     sequences = parser.parse(host)
     #labels = [str(l.name) for l in db.session.query(Label).all()]
-    results = classify(sequences, labels, host)
+    results = classifier.classify(sequences, labels, host)
     db.session.query(ClassificationResult).filter(ClassificationResult.host == host).delete()
     db.session.add_all(results)
     db.session.commit()

@@ -21,5 +21,6 @@ transformers
 
 # Selenium
 bs4
+goose3
 selenium
 webdriver-manager

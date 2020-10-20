@@ -5,7 +5,7 @@ import {
   UPDATE_HIDDEN
 } from '../../messages'
 import {
-  extractNodes
+  extractNodesRecursively
 } from "./extractNodes"
 import {
   getLabels
@@ -30,8 +30,9 @@ var classificationResultsOverrides = [];
   console.log("Running classifier")
   setupClassificationResults().then(() => {
     const body = bodyNode()
-    const initialNodes = extractNodes(body)
-    render(initialNodes, classificationResults, classificationResultsOverrides)
+    extractNodesRecursively(body, nodes => {
+      nodes.forEach(node => render(node, classificationResults, classificationResultsOverrides))
+    }, (ig1, ig2) => false)
     startListeningForDOMChanges(body)
   })
 })()
@@ -50,7 +51,9 @@ function startListeningForDOMChanges(rootNode) {
   registerMutationObserver(rootNode, false, nodes => {
     let currentNodes = [...document.getElementsByClassName("attn_obscured_content")]
     nodes = nodes.filter(n => !currentNodes.some(cn => (n.contains(cn) || cn.contains(n)) && !n.isSameNode(cn)))
-    if (nodes.length > 0) render(nodes, classificationResults, classificationResultsOverrides)
+    if (nodes.length > 0) {
+      nodes.forEach(node => render(node, classificationResults, classificationResultsOverrides))
+    }
   }, null)
 }
 
@@ -66,7 +69,9 @@ function handleFetchHidden(msg, response) {
     }
   })
 
-  response({hiddenContent: removeDuplicateObjects(hiddenContent, "id")})
+  response({
+    hiddenContent: removeDuplicateObjects(hiddenContent, "id")
+  })
 }
 
 function handleUpdateHidden(msg, response) {

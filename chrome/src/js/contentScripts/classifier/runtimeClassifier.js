@@ -11,7 +11,7 @@ import {
 } from "./utils"
 
 import {
-  extractNodes
+  extractNodesRecursively
 } from './extractNodes'
 import {
   classify
@@ -59,7 +59,7 @@ var labels;
   setupCache().then(() => {
     if (labels.length === 0) return
     const body = bodyNode()
-    const initialNodes = extractNodes(body)
+    const initialNodes = extractNodesRecursively(body)
     classifyNodes(initialNodes).then(render)
     startListeningForDOMChanges(body)
   })
