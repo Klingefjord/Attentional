@@ -81,13 +81,18 @@ function handleUpdateHidden(msg, response) {
   })
 
   classificationResultsOverrides = removeDuplicateObjects(classificationResultsOverrides, 'id')
-
-  console.log("Should be one element: ", Array.from(document.getElementsByClassName(`attn_obs_${msg.id}`)))
-
-  Array.from(document.getElementsByClassName(`attn_obs_${msg.id}`)).forEach(node => {
-    node.hidden = msg.hide
-  })
-
+  const nodes = Array.from(document.getElementsByClassName(`attn_obs_${msg.id}`))
+  nodes.forEach(node => node.hidden = msg.hide)
+  if (nodes.length > 0) {
+    console.log(nodes[0])
+    nodes[0].scrollIntoView({
+      behavior: 'smooth',
+      block: 'center',
+      inline: 'center'
+    })
+  } else {
+    alert("That piece of content no longer exists")
+  }
   response(true)
 }
 

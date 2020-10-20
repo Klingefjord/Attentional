@@ -63,19 +63,23 @@ const ShowHiddenContentView = props => {
     </li>
   }
 
-  useEffect(() => {
+
+  const refresh = () => {
     const load = async () => {
       const initialHiddenContent = await getHiddenContent()
       setHiddenContentList(initialHiddenContent)
     }
 
     load()
-  }, [])
+  }
+
+  useEffect(refresh, [])
 
   return (
     <div>
       <h1>Hidden content</h1>
       <ul>{hiddenContentList.map(renderHiddenContent)}</ul>
+      <button onClick={e => refresh()}>Refresh</button>
     </div>
   )
 }
