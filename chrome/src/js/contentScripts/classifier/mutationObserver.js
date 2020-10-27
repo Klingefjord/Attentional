@@ -25,7 +25,10 @@ export function registerMutationObserver(rootNode, throttle, addedNodesCallback,
   const observationHandler = (mutationsList, observer) => {
     for (const mutation of mutationsList) {
       if (mutation.type === 'childList' && mutation.addedNodes && mutation.addedNodes.length > 0) {
-        const addedNodes = [...mutation.addedNodes].filter(isValidTextNode)
+        const addedNodes = [...mutation.addedNodes]
+          .filter(n => n.querySelector('article'))
+          .map(n => n.querySelector('article'))
+
         if (addedNodes.length === 0) {
           continue
         } else {

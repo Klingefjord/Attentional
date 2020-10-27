@@ -46,9 +46,15 @@ class Extractor():
         for _ in range(scroll_iterations):
             sleep(3)
             html = self.driver.page_source.encode("utf-8")
-            text.update(self.__convert_html(html))
+            text.update(self.__convert_html_simple(html))
             self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
         return text
+
+    def __convert_html_simple(self, html):
+        soup = BeautifulSoup(html, 'html.parser')
+        articles = soup.find_all('article')
+        text = [re.sub("\s\s+" , " ", a.get_text(separator=' ')) for a in articles if a.text != '']
+        return [t for t in text if len(t) > self.min_length and len(t) < self.max_length]
 
     def __convert_html(self, html):
         """

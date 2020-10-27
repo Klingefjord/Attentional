@@ -5,8 +5,15 @@ import {
 } from '../constants'
 
 import {
+	HOST_UPDATE,
 	REMOVE_MODAL
 } from "../messages";
+
+import {
+	restartPoller
+} from './poller'
+
+restartPoller()
 
 chrome.webNavigation.onDOMContentLoaded.addListener(function (details) {
 	if (/^https:/.test(details.url)) {
@@ -41,4 +48,8 @@ chrome.contextMenus.onClicked.addListener(function (data, tab) {
 			resolve(response)
 		})
 	}
+})
+
+chrome.extension.onMessage.addListener((msg, sender, response) => {
+	if (msg.action === HOST_UPDATE) restartPoller()
 })

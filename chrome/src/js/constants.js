@@ -16,6 +16,8 @@ export const TEXT_PERCENTAGE_THRESHOLD = 0.3
 // How often to sync local cache with chrome storage
 export const CACHE_UPDATE_INTERVAL_MILLIS = 10_000
 
+export const POLLING_INTERVAL = 240_000
+
 /**
  * Content Script IDs
  */

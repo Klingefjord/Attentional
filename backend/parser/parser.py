@@ -25,6 +25,8 @@ def parse(host):
     else:
         text = Extractor(driver).extract_general(host)
 
+    driver.close()
+    driver.quit()
     return [(str(s)) for s in text if regex.match(str(s))]
 
 # # For testing purposes

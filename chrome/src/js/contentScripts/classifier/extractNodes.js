@@ -2,6 +2,11 @@ import {
   isValidTextNode
 } from "./utils"
 
+export function extractArticleNodes(rootNode) {
+  const articles = rootNode.querySelector('article')
+  return articles ? [...articles] : []
+}
+
 /**
  * Algorithm for finding text nodes from a root with a granularity capped by @const MAX_SEQUENCE_COUNT
  *    

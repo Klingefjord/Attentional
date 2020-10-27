@@ -1,10 +1,10 @@
-import regeneratorRuntime from "regenerator-runtime"
 import {
   LABEL_UPDATE,
   FETCH_HIDDEN,
   UPDATE_HIDDEN
 } from '../../messages'
 import {
+  extractArticleNodes,
   extractNodesRecursively
 } from "./extractNodes"
 import {
@@ -30,9 +30,13 @@ var classificationResultsOverrides = [];
   console.log("Running classifier")
   setupClassificationResults().then(() => {
     const body = bodyNode()
-    extractNodesRecursively(body, nodes => {
-      nodes.forEach(node => render(node, classificationResults, classificationResultsOverrides))
-    }, (ig1, ig2) => false)
+    const nodes = extractArticleNodes(body)
+    for (const node of nodes) {
+      render(node, classificationResults, classificationResultsOverrides)
+    }
+    // extractNodesRecursively(body, nodes => {
+    //   nodes.forEach(node => render(node, classificationResults, classificationResultsOverrides))
+    // }, (ig1, ig2) => false)
     startListeningForDOMChanges(body)
   })
 })()
@@ -65,7 +69,7 @@ function handleFetchHidden(msg, response) {
       id: node.dataset.attn_id,
       text: node.innerText,
       reason: node.dataset.attn_reason,
-      hidden: node.hidden
+      hidden: node.style.display === 'none'
     }
   })
 
@@ -82,9 +86,8 @@ function handleUpdateHidden(msg, response) {
 
   classificationResultsOverrides = removeDuplicateObjects(classificationResultsOverrides, 'id')
   const nodes = Array.from(document.getElementsByClassName(`attn_obs_${msg.id}`))
-  nodes.forEach(node => node.hidden = msg.hide)
   if (nodes.length > 0) {
-    console.log(nodes[0])
+    nodes.forEach(node => node.style.display = msg.hide ? 'none' : '')
     nodes[0].scrollIntoView({
       behavior: 'smooth',
       block: 'center',

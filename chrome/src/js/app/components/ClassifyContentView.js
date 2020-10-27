@@ -58,7 +58,7 @@ const ClassifyContentView = props => {
     e.preventDefault()
     const copy = [...hosts]
     const host = hostInputValue
-    if (!copy.includes(host)) hosts.push(host)
+    if (!copy.includes(host)) copy.push(host)
     updateHosts(copy)
     setHostInputValue("")
   }
@@ -115,19 +115,19 @@ const ClassifyContentView = props => {
 
   return (
     <div>
-      <h1>Classify Content</h1>
+      <h1>Filter Content</h1>
       <ul>{labels.map(label => <li key={label}>{label} <button onClick={_ => removeLabel(label)}>remove</button></li>)}</ul>
       <form onSubmit={e => handleLabelFormSubmit(e)}>
         <input type="text" value={labelInputValue} onChange={e => setLabelInputValue(e.target.value)} />
         <input disabled={!/[A-Za-z]+/.test(labelInputValue)} type="submit" value="Add Label" />
       </form>
       <br></br>
-      <ul>{hosts.map(host => <li key={host}>{host} <button onClick={_ => removeHost(label)}>remove</button></li>)}</ul>
+      <ul>{hosts.map(host => <li key={host}>{host} <button onClick={_ => removeHost(host)}>remove</button></li>)}</ul>
       <form onSubmit={e => handleHostFormSubmit(e)}>
         <input type="text" value={hostInputValue} onChange={e => setHostInputValue(e.target.value)} />
         <input disabled={!/[A-Za-z]+/.test(hostInputValue)} type="submit" value="Add a website" />
       </form>
-      <button onClick={_ => runClassifier()}>Run classifier</button>
+      <button onClick={_ => runClassifier()}>Run Filtration</button>
       <button onClick={_ => clearStorage().then(() => updateLabels([]))}>Clear storage</button>
     </div>
   )

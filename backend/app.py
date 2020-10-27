@@ -62,8 +62,10 @@ def parse():
     sequences = parser.parse(host)
     #labels = [str(l.name) for l in db.session.query(Label).all()]
     results = classifier.classify(sequences, labels, host)
-    db.session.query(ClassificationResult).filter(ClassificationResult.host == host).delete()
-    db.session.add_all(results)
+    # db.session.query(ClassificationResult).filter(ClassificationResult.host == host).delete()
+    for result in results:
+        db.session.merge(result)
+
     db.session.commit()
     return jsonify({})
 
@@ -73,7 +75,7 @@ def content():
     body = request.json
     host = body['host']
     labels = body['labels']
-    results = [cr.to_dict() for cr in ClassificationResult.query.all() if cr.label in labels]
+    results = [cr.to_dict() for cr in ClassificationResult.query.filter(ClassificationResult.host == host).all() if cr.label in labels]
     return jsonify({ 'results': results })
 
 if __name__ == '__main__':
