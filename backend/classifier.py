@@ -24,10 +24,6 @@ class Classifier():
         print(f"Starting classifier for {len(sequences)} sequences.")
         outputs = self.bart_classifier(sequences, labels, multi_class=True)
 
-        for sequence in sequences:
-            if "erdogan" in sequence.lower():
-                print("bingo")
-
         db_results = []
         for output in outputs:
             for label, score in zip(output['labels'], output['scores']):
