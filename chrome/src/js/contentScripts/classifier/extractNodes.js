@@ -4,7 +4,7 @@ import {
 
 export function extractArticleNodes(rootNode) {
   const articles = rootNode.querySelector('article')
-  return articles ? [...articles] : []
+  return articles ? Array.from(articles) : []
 }
 
 /**

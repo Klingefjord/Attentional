@@ -9,10 +9,7 @@ import {
  * Hides nodes if its classified text for any label surpasses @constant OBSCURE_THRESHOLD
  */
 export function render(node, classificationResults, classificationResultsOverrides) {
-    const id = hashCode(node.textContent.replace(/\s/g, '').replace(/\d/g,''))
-    if (node.textContent.toLowerCase().includes("erdogan")) {
-        console.log("bingo")
-    }
+    const id = hashCode(node)
     const matchedClassificationResults = classificationResults.filter(cr => cr.sequence_hash === id)
     if (!matchedClassificationResults || matchedClassificationResults.length === 0) return
     const override = classificationResultsOverrides.find(cr => cr.id === id)

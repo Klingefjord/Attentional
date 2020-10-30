@@ -1,8 +1,9 @@
 // Classifier
 export const UPDATE_HIDDEN   = "update_override"
 export const LABEL_UPDATE    = "label_update"
-export const HOST_UPDATE    = "host_update"
+export const HOST_UPDATE     = "host_update"
 export const FETCH_HIDDEN    = "fetch_hidden_content"
+export const REFRESH_HOSTS   = "refresh_hosts"
 
 // Element Removal
 export const REMOVE_MODAL    = "remove_modal"

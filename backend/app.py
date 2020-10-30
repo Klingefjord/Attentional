@@ -69,6 +69,21 @@ def parse():
     db.session.commit()
     return jsonify({})
 
+@app.route('/classify', methods=['POST'])
+def classify():
+    """Classify a set of sequences"""
+    body = request.json
+    sequences = body['sequences']
+    host = body['host']
+    labels = body['labels']
+    results = classifier.classify(sequences, labels, host)
+
+    for result in results:
+        db.session.merge(result)
+
+    db.session.commit()
+    return jsonify({})
+
 @app.route('/content', methods=['POST'])
 def content():
     """Get the classified text nodes for a specified host"""

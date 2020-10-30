@@ -13,6 +13,7 @@ import {
 var poller;
 
 export const restartPoller = () => {
+    return
     if (poller) clearInterval(poller)
     poll()
     poller = setInterval(poll, POLLING_INTERVAL)

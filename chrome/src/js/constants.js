@@ -18,9 +18,12 @@ export const CACHE_UPDATE_INTERVAL_MILLIS = 10_000
 
 export const POLLING_INTERVAL = 240_000
 
+export const EXTRACTOR_SCROLL_COUNT = 5
+
 /**
  * Content Script IDs
  */
-export const CLASSIFIER_ID = "runtimeClassifier.bundle.js"
-export const FEATURE_REMOVER_ID = "featureRemover.bundle.js"
-export const SERVER_CLASSIFIER_ID = "serverClassifier.bundle.js"
+export const LEGACY_CLASSIFIER_CONTENT_SCRIPT = "runtimeClassifier.bundle.js"
+export const FEATURE_REMOVER_CONTENT_SCRIPT = "featureRemover.bundle.js"
+export const CLASSIFIER_CONTENT_SCRIPT = "serverClassifier.bundle.js"
+export const EXTRACTOR_CONTENT_SCRIPT = "extractor.bundle.js"

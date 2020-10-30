@@ -20,6 +20,10 @@ class Classifier():
     def classify(self, sequences, labels, host):
         """Calls the classification model with a set of sequences and a set of labels"""
 
+        if len(sequences) == 0:
+            print("No sequences passed to classify")
+            return []
+
         start_time = time.time()
         print(f"Starting classifier for {len(sequences)} sequences.")
         outputs = self.bart_classifier(sequences, labels, multi_class=True)
@@ -28,7 +32,7 @@ class Classifier():
         for output in outputs:
             for label, score in zip(output['labels'], output['scores']):
                 if (score >= self.threshold):
-                    print(f"Sequence: {output['sequence'][:100]} \t score: {score} \t label: {label}")
+                    print(f"Sequence: {output['sequence']} \t score: {score} \t label: {label}")
                 db_results.append(ClassificationResult(
                     label=label, 
                     score=score, 

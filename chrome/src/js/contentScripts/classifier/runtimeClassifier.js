@@ -6,8 +6,7 @@ import {
 
 import {
   nodeKey,
-  nodeText,
-  chunkify
+  textForClassification
 } from "./utils"
 
 import {
@@ -93,7 +92,7 @@ async function classifyNodes(nodes) {
       nodesExistingInCache[key] = cache[key]
     } else {
       node.classList.add(key)
-      nodesPendingClassification[key] = nodeText(node).slice(0, MAX_TEXT_LENGTH)
+      nodesPendingClassification[key] = textForClassification(node).slice(0, MAX_TEXT_LENGTH)
     }
   }
 
@@ -158,7 +157,7 @@ function handleFetchHidden(msg, response) {
       const decision = cache[key].decision
       if (classificationResults && decision) {
         const maxLabel = Object.keys(classificationResults).reduce((a, b) => classificationResults[a] > classificationResults[b] ? a : b)
-        const text = [...document.getElementsByClassName(key)].map(nodeText).sort((a, b) => a.length - b.length)[0]
+        const text = [...document.getElementsByClassName(key)].map(textForClassification).sort((a, b) => a.length - b.length)[0]
         if (classificationResults && maxLabel && text) {
           hidden.push({
             key: key,

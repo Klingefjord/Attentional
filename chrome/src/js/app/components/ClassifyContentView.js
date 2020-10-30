@@ -10,10 +10,13 @@ import {
   setHosts as setHostsInStorage,
   clear as clearStorage
 } from '../../chromeStorage'
-import { CLASSIFIER_ID } from '../../constants'
+import {
+  LEGACY_CLASSIFIER_CONTENT_SCRIPT
+} from '../../constants'
 import {
   LABEL_UPDATE,
-  HOST_UPDATE
+  HOST_UPDATE,
+  REFRESH_HOSTS
 } from "../../messages";
 
 
@@ -109,8 +112,16 @@ const ClassifyContentView = props => {
         currentWindow: true
       }, tabs =>
       chrome.tabs.executeScript(tabs[0].id, {
-        file: CLASSIFIER_ID
+        file: LEGACY_CLASSIFIER_CONTENT_SCRIPT
       }))
+  }
+
+  const refreshHosts = _ => {
+    chrome.runtime.sendMessage({
+      action: REFRESH_HOSTS
+    }, response => {
+      return true
+    })
   }
 
   return (
@@ -129,6 +140,7 @@ const ClassifyContentView = props => {
       </form>
       <button onClick={_ => runClassifier()}>Run Filtration</button>
       <button onClick={_ => clearStorage().then(() => updateLabels([]))}>Clear storage</button>
+      <button onClick={_ => refreshHosts()}>Refresh hosts</button>
     </div>
   )
 }

@@ -1,37 +1,54 @@
 import {
+	getHosts,
+	getPendingExtraction,
+	setPendingExtraction
+} from '../chromeStorage';
+import {
 	RUNTIME_CLASSIFIER_ID,
-	SERVER_CLASSIFIER_ID,
-	FEATURE_REMOVER_ID
+	CLASSIFIER_CONTENT_SCRIPT,
+	FEATURE_REMOVER_CONTENT_SCRIPT,
+	EXTRACTOR_CONTENT_SCRIPT
 } from '../constants'
 
 import {
 	HOST_UPDATE,
-	REMOVE_MODAL
+	REMOVE_MODAL,
+	REFRESH_HOSTS
 } from "../messages";
 
-import {
-	restartPoller
-} from './poller'
+// import {
+// 	restartPoller
+// } from './poller'
 
-restartPoller()
+// restartPoller()
+console.log("running background script")
 
 chrome.webNavigation.onDOMContentLoaded.addListener(function (details) {
 	if (/^https:/.test(details.url)) {
-		// chrome.tabs.executeScript(details.tabId, {
-		// 	file: CLASSIFIER_ID
-		// })
+		const host = new URL(details.url).hostname
+		getPendingExtraction(host).then(pendingExtraction =>  {
+			if (pendingExtraction) {
+				setPendingExtraction(host, false).then(() => {
+					chrome.tabs.executeScript(details.tabId, {
+						file: EXTRACTOR_CONTENT_SCRIPT
+					})
+				})
+			} else {
+				chrome.tabs.executeScript(details.tabId, {
+					file: CLASSIFIER_CONTENT_SCRIPT
+				})
 		
-
-		chrome.tabs.executeScript(details.tabId, {
-			file: SERVER_CLASSIFIER_ID
-		})
-
-		chrome.tabs.executeScript(details.tabId, {
-			file: FEATURE_REMOVER_ID
+				chrome.tabs.executeScript(details.tabId, {
+					file: FEATURE_REMOVER_CONTENT_SCRIPT
+				})
+			}
 		})
 	}
 })
 
+/* 
+	Feature extractor 
+*/
 chrome.contextMenus.create({
 	"id": "feature_remover",
 	"title": "Hide this feature",
@@ -51,5 +68,16 @@ chrome.contextMenus.onClicked.addListener(function (data, tab) {
 })
 
 chrome.extension.onMessage.addListener((msg, sender, response) => {
-	if (msg.action === HOST_UPDATE) restartPoller()
+	if (msg.action === REFRESH_HOSTS) {
+		getHosts().then(hosts => {
+			hosts.forEach(host => {
+				setPendingExtraction(host, true).then(() => {
+					chrome.tabs.create({
+						url: `https://${host}/`,
+						active: false
+					}, tab => response(true))
+				})
+			})
+		})
+	}
 })
