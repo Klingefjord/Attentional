@@ -58,7 +58,7 @@ async function finish() {
     const sequences = [...nodes].map(textForClassification)
 
     const getAccumulatedSequences = () => getSequencesPendingExtraction(host).then(oldSequences => {
-        return [...new Set([...oldSequences, sequences])]
+        return [...new Set([...oldSequences, ...sequences])]
     })
     const updateAccumulatedSequences = () => getAccumulatedSequences().then(sequences => setSequencesPendingExtraction(host, sequences))
 
@@ -74,19 +74,16 @@ async function finish() {
             setFeedReadIteration(host, 0)
                 .then(() => setPendingExtraction(host, false))
                 .then(() => getAccumulatedSequences())
-                .then(accumulatedSequences =>
-                    setSequencesPendingExtraction(host, []).then(() => {
-                        sendRequest(host, accumulatedSequences)
-                        window.close()
-                    })
-                )
+                .then(accumulatedSequences => sendRequest(host, accumulatedSequences))
+                .then(() => setSequencesPendingExtraction(host, []))
+                .then(() => window.close())
         }
     })
 }
 
-function sendRequest(host, sequences) {
-    getLabels().then(labels => {
-        fetch(`${BASE_URL}/classify`, {
+async function sendRequest(host, sequences) {
+    const labels = await getLabels()
+    return fetch(`${BASE_URL}/classify`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -99,5 +96,4 @@ function sendRequest(host, sequences) {
             })
         }).then(response => response.json())
         .catch(err => console.error(err))
-    })
 }

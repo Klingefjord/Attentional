@@ -1,3 +1,4 @@
+from threading import Thread
 from flask import Flask, request, jsonify
 from classifier import Classifier
 from parser import parser
@@ -76,13 +77,15 @@ def classify():
     sequences = body['sequences']
     host = body['host']
     labels = body['labels']
-    results = classifier.classify(sequences, labels, host)
-
-    for result in results:
-        db.session.merge(result)
-
-    db.session.commit()
+    Thread(target = classify_task, args=(sequences, labels, host, app)).start()
     return jsonify({})
+
+def classify_task(sequences, labels, host, app):
+    with app.app_context():
+        results = classifier.classify(sequences, labels, host)
+        for result in results: db.session.merge(result)
+        db.session.commit()
+        return
 
 @app.route('/content', methods=['POST'])
 def content():
