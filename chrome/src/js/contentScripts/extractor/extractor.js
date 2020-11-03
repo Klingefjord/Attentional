@@ -64,13 +64,11 @@ async function finish() {
 
     getFeedReadIteration(host).then(feedReadIteration => {
         if (feedReadIteration < FEED_READ_COUNT) {
-            alert("Feed read iteration is " + feedReadIteration + ". I'm reloading")
             setFeedReadIteration(host, ++feedReadIteration)
                 .then(() => setPendingExtraction(host, true))
                 .then(() => updateAccumulatedSequences())
                 .then(() => window.location.reload())
         } else {
-            alert("Feed read iteration is " + feedReadIteration + ". I'm finished and sending request")
             setFeedReadIteration(host, 0)
                 .then(() => setPendingExtraction(host, false))
                 .then(() => getAccumulatedSequences())

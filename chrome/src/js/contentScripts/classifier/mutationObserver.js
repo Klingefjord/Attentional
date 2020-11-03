@@ -25,15 +25,19 @@ export function registerMutationObserver(rootNode, throttle, addedNodesCallback,
   const observationHandler = (mutationsList, observer) => {
     for (const mutation of mutationsList) {
       if (mutation.type === 'childList' && mutation.addedNodes && mutation.addedNodes.length > 0) {
-        const addedNodes = [...mutation.addedNodes]
+        const articleNodes = [...mutation.addedNodes]
           .filter(n => n.querySelector('article'))
           .map(n => n.querySelector('article'))
-
-        if (addedNodes.length === 0) {
+        if (articleNodes.length === 0) {
+          [...mutation.addedNodes]
+          .filter(n => n.innerText && (n.innerText.toLowerCase() === "show this thread" || n.innerText.toLowerCase() === "show more replies"))
+            .map(n => {
+              n.style.display = 'none'
+            })
           continue
         } else {
-          addedNodesCallback(addedNodes)
-          if (throttle) queue = queue.concat(addedNodes)
+          addedNodesCallback(articleNodes)
+          if (throttle) queue = queue.concat(articleNodes)
         }
       }
     }

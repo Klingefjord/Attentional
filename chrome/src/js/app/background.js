@@ -4,7 +4,6 @@ import {
 	setPendingExtraction
 } from '../chromeStorage';
 import {
-	RUNTIME_CLASSIFIER_ID,
 	CLASSIFIER_CONTENT_SCRIPT,
 	FEATURE_REMOVER_CONTENT_SCRIPT,
 	EXTRACTOR_CONTENT_SCRIPT
@@ -16,17 +15,13 @@ import {
 	REFRESH_HOSTS
 } from "../messages";
 
-// import {
-// 	restartPoller
-// } from './poller'
 
-// restartPoller()
 console.log("running background script")
 
 chrome.webNavigation.onDOMContentLoaded.addListener(function (details) {
-	if (/^https:/.test(details.url)) {
+	if (/^https:\/\/twitter.com/.test(details.url)) {
 		const host = new URL(details.url).hostname
-		getPendingExtraction(host).then(pendingExtraction =>  {
+		getPendingExtraction(host).then(pendingExtraction => {
 			if (pendingExtraction) {
 				setPendingExtraction(host, false).then(() => {
 					chrome.tabs.executeScript(details.tabId, {
@@ -34,10 +29,10 @@ chrome.webNavigation.onDOMContentLoaded.addListener(function (details) {
 					})
 				})
 			} else {
-					chrome.tabs.executeScript(details.tabId, {
+				chrome.tabs.executeScript(details.tabId, {
 					file: CLASSIFIER_CONTENT_SCRIPT
 				})
-		
+
 				chrome.tabs.executeScript(details.tabId, {
 					file: FEATURE_REMOVER_CONTENT_SCRIPT
 				})
