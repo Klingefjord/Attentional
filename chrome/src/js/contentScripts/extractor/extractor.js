@@ -1,14 +1,19 @@
 import regeneratorRuntime from "regenerator-runtime"
 import {
+    getFeedReadIteration,
     getLabels,
-    setPendingExtraction
+    setFeedReadIteration,
+    setPendingExtraction,
+    getSequencesPendingExtraction,
+    setSequencesPendingExtraction
 } from "../../chromeStorage";
 import {
     textForClassification
 } from "../classifier/utils";
 
 import {
-    EXTRACTOR_SCROLL_COUNT as SCROLL_COUNT
+    EXTRACTOR_SCROLL_COUNT as SCROLL_COUNT,
+    FEED_READ_COUNT
 } from "../../constants"
 
 import {
@@ -50,10 +55,37 @@ async function finish() {
     clearInterval(scroller)
 
     const host = window.location.host
-    const labels = await getLabels()
     const sequences = [...nodes].map(textForClassification)
 
-    const sendRequest = (host, labels) =>
+    const getAccumulatedSequences = () => getSequencesPendingExtraction(host).then(oldSequences => {
+        return [...new Set([...oldSequences, sequences])]
+    })
+    const updateAccumulatedSequences = () => getAccumulatedSequences().then(sequences => setSequencesPendingExtraction(host, sequences))
+
+    getFeedReadIteration(host).then(feedReadIteration => {
+        if (feedReadIteration < FEED_READ_COUNT) {
+            alert("Feed read iteration is " + feedReadIteration + ". I'm reloading")
+            setFeedReadIteration(host, ++feedReadIteration)
+                .then(() => setPendingExtraction(host, true))
+                .then(() => updateAccumulatedSequences())
+                .then(() => window.location.reload())
+        } else {
+            alert("Feed read iteration is " + feedReadIteration + ". I'm finished and sending request")
+            setFeedReadIteration(host, 0)
+                .then(() => setPendingExtraction(host, false))
+                .then(() => getAccumulatedSequences())
+                .then(accumulatedSequences =>
+                    setSequencesPendingExtraction(host, []).then(() => {
+                        sendRequest(host, accumulatedSequences)
+                        window.close()
+                    })
+                )
+        }
+    })
+}
+
+function sendRequest(host, sequences) {
+    getLabels().then(labels => {
         fetch(`${BASE_URL}/classify`, {
             method: "POST",
             headers: {
@@ -67,7 +99,5 @@ async function finish() {
             })
         }).then(response => response.json())
         .catch(err => console.error(err))
-
-    window.close()
-    await sendRequest(host, labels)
+    })
 }

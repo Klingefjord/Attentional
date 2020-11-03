@@ -1,5 +1,5 @@
 import {
-    OBSCURE_THRESHOLD
+    OBSCURE_THRESHOLD, ONLY_SHOW_CLASSIFIED_CONTENT
 } from "../../constants"
 import {
     hashCode
@@ -11,7 +11,12 @@ import {
 export function render(node, classificationResults, classificationResultsOverrides) {
     const id = hashCode(node)
     const matchedClassificationResults = classificationResults.filter(cr => cr.sequence_hash === id)
-    if (!matchedClassificationResults || matchedClassificationResults.length === 0) return
+    if (!matchedClassificationResults || matchedClassificationResults.length === 0) {
+        if (ONLY_SHOW_CLASSIFIED_CONTENT) {
+            node.dataset.attn_reason = "Not classified yet"
+            hideNode(node, id)
+        }
+    }
     const override = classificationResultsOverrides.find(cr => cr.id === id)
     let shouldHide = false
 

@@ -34,7 +34,7 @@ chrome.webNavigation.onDOMContentLoaded.addListener(function (details) {
 					})
 				})
 			} else {
-				chrome.tabs.executeScript(details.tabId, {
+					chrome.tabs.executeScript(details.tabId, {
 					file: CLASSIFIER_CONTENT_SCRIPT
 				})
 		

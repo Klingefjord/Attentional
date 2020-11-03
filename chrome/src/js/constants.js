@@ -20,6 +20,10 @@ export const POLLING_INTERVAL = 240_000
 
 export const EXTRACTOR_SCROLL_COUNT = 5
 
+export const FEED_READ_COUNT = 2
+
+export const ONLY_SHOW_CLASSIFIED_CONTENT = true
+
 /**
  * Content Script IDs
  */
