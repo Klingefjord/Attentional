@@ -1,8 +1,10 @@
 import {
-    OBSCURE_THRESHOLD, ONLY_SHOW_CLASSIFIED_CONTENT
+    OBSCURE_THRESHOLD,
+    ONLY_SHOW_CLASSIFIED_CONTENT
 } from "../../constants"
 import {
-    hashCode
+    hashCode,
+    ignoreableNode
 } from "./utils"
 
 /**
@@ -11,24 +13,25 @@ import {
 export function render(node, classificationResults, classificationResultsOverrides) {
     const id = hashCode(node)
     const matchedClassificationResults = classificationResults.filter(cr => cr.sequence_hash === id)
-    const getRelevantSibling = (n, recursionDepth = 0) => {
-        const candidate = n.parentElement && [...n.parentElement.children].length === 1 && recursionDepth < 3 
-            ? getRelevantSibling(n.parentElement, ++recursionDepth) 
-            : n.previousElementSibling
+    const topLevelContainer = getTopLevelContainer(node)
+    const getRelevantSibling = (node, recursionDepth = 0) =>
+        ignoreableNode(node.previousElementSibling) && recursionDepth < 3 ?
+        getRelevantSibling(node.previousElementSibling, ++recursionDepth) :
+        node.previousElementSibling
 
-        const ignore = candidate && candidate.textContent && (candidate.textContent.toLowerCase() === "show this thread" || candidate.textContent.toLowerCase() === "show more replies")
-
-        return ignore ? candidate.previousElementSibling : candidate
-    }
-    const relevantSibling = getRelevantSibling(node)
+    const relevantSibling = getRelevantSibling(topLevelContainer)
 
     if (!matchedClassificationResults || matchedClassificationResults.length === 0) {
-        if (ONLY_SHOW_CLASSIFIED_CONTENT) hideNode(node, id, "Not classified yet", true)
+        if (ONLY_SHOW_CLASSIFIED_CONTENT) hideNodeAndPreceedingSiblings(topLevelContainer, id, "Not classified yet")
         return
     } else if (relevantSibling && relevantSibling.dataset.attn_no_border) {
-        hideNode(node, id, relevantSibling.dataset.attn_reason, true)
+        // Hide nodes after a removed node without a border (meaning it is part of a thread)
+        hideNode(topLevelContainer, relevantSibling.dataset.attn_reason, id)
         return
     }
+
+    // so - I hide a level underneath of what I am supposed to hide now all of a sudden
+    // how do I fix this?
 
     const override = classificationResultsOverrides.find(cr => cr.id === id)
     let shouldHide = false
@@ -44,21 +47,43 @@ export function render(node, classificationResults, classificationResultsOverrid
         }
     })
 
-    if (shouldHide) hideNode(node, id, reason, true)
+    if (shouldHide) hideNodeAndPreceedingSiblings(topLevelContainer, id, reason)
 }
 
-const hideNode = (node, id, reason, recursive, recursionDepth = 0) => {
-    if (recursive && node.parentElement && [...node.parentElement.children].length === 1 && recursionDepth < 3) {
-        hideNode(node.parentElement, id, reason, true, ++recursionDepth)
-    } else {
-        const hasBottomBorder = node.clientHeight !== node.offsetHeight
-        if (!hasBottomBorder) node.dataset.attn_no_border = true
-        node.dataset.attn_reason = reason
-        node.classList.add("attn_obscured_content")
-        node.classList.add(`attn_obs_${id}`)
-        node.dataset.attn_id = id
-        node.style.display = 'none'
+const getTopLevelContainer = (node, recursionDepth = 0) => {
+    return node.parentElement && [...node.parentElement.children].length === 1 && recursionDepth < 3 ?
+        getTopLevelContainer(node.parentElement, ++recursionDepth) :
+        node
+}
+
+const hideNodeAndPreceedingSiblings = (node, id, reason) => {
+    // A thread consist of a series of nodes, and the last node will have a border.
+    // To hide nodes after the classified node, see above.
+    // To hide nodes above classified node, recursively check if the previous sibling
+    // has a border
+    const hideNodesAbove = (n, rd = 0) => {
+        if (n.previousElementSibling && ignoreableNode(n.previousElementSibling)) {
+            hideNodesAbove(n.previousElementSibling, rd)
+        } else if (n.previousElementSibling && missingBottomBorder(n.previousElementSibling) && rd < 3) {
+            hideNode(n.previousElementSibling, reason, id)
+            hideNodesAbove(n.previousElementSibling, ++rd)
+        }
     }
+
+    hideNode(node, reason, id)
+    hideNodesAbove(node)
+}
+
+const missingBottomBorder = node => {
+    return node.firstElementChild.clientHeight !== 0 && node.firstElementChild.clientHeight === node.firstElementChild.offsetHeight
+}
+
+const hideNode = (node, reason, id) => {
+    if (missingBottomBorder(node)) node.dataset.attn_no_border = true
+    node.dataset.attn_reason = reason
+    node.classList.add("attn_obscured_content")
+    node.classList.add(`attn_obs_${id}`)
+    node.style.display = 'none'
 }
 
 const reasonString = (node, classificationResult) => {

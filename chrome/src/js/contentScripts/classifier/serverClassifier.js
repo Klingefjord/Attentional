@@ -66,8 +66,8 @@ function handleFetchHidden(msg, response) {
   const hiddenNodes = [...document.getElementsByClassName("attn_obscured_content")]
   const hiddenContent = hiddenNodes.map(node => {
     return {
-      id: node.dataset.attn_id,
-      text: node.innerText,
+      id: [...node.classList].filter(c => c.startsWith("attn_obs_"))[0].replace("attn_obs_", ""),
+      text: node.textContent,
       reason: node.dataset.attn_reason,
       hidden: node.style.display === 'none'
     }

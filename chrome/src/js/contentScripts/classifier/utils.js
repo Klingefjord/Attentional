@@ -36,6 +36,10 @@ export function isValidStr(str, minLength) {
     return str && /[a-zA-Z]/.test(str) && str.replace(/[\n\r]+|[\s]{2,}/g, " ").length >= minLength
 }
 
+export function ignoreableNode(node) {
+    return node && node.textContent && (node.textContent.toLowerCase() === "show this thread" || node.textContent.toLowerCase() === "show more replies")
+}
+
 /**
  * Returns an array of @param len - sized chunks from @param str
  */

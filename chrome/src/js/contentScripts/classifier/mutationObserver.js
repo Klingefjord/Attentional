@@ -1,4 +1,5 @@
 import {
+  ignoreableNode,
   isValidTextNode
 } from './utils'
 
@@ -29,8 +30,7 @@ export function registerMutationObserver(rootNode, throttle, addedNodesCallback,
           .filter(n => n.querySelector('article'))
           .map(n => n.querySelector('article'))
         if (articleNodes.length === 0) {
-          [...mutation.addedNodes]
-          .filter(n => n.innerText && (n.innerText.toLowerCase() === "show this thread" || n.innerText.toLowerCase() === "show more replies"))
+          [...mutation.addedNodes].filter(ignoreableNode)
             .map(n => {
               n.style.display = 'none'
             })
