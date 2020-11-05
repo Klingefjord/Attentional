@@ -27,6 +27,7 @@ var options = {
     runtimeClassifier: path.join(__dirname, "src", "js", "contentScripts", "classifier", "runtimeClassifier.js"),
     serverClassifier: path.join(__dirname, "src", "js", "contentScripts", "classifier", "serverClassifier.js"),
     featureRemover: path.join(__dirname, "src", "js", "contentScripts", "featureRemover", "featureRemover.js"),
+    timer: path.join(__dirname, "src", "js", "contentScripts", "timer", "timer.js"),
     extractor: path.join(__dirname, "src", "js", "contentScripts", "extractor", "extractor.js"),
     options: path.join(__dirname, "src", "js", "app", "options.js"),
     background: path.join(__dirname, "src", "js", "app", "background.js")

@@ -8,7 +8,8 @@ import {
   extractNodesRecursively
 } from "./extractNodes"
 import {
-  getLabels
+  getLabels,
+  getTimeSpentOnSiteTodaySeconds
 } from '../../chromeStorage'
 import {
   registerMutationObserver
@@ -48,7 +49,13 @@ var classificationResultsOverrides = [];
 })()
 
 async function setupClassificationResults() {
-  return getLabels().then(labels => {
+  return getTimeSpentOnSiteTodaySeconds().then(seconds => {
+    if (seconds > 15) {
+      throw new Error("Time limit reached today, not fetching content")
+    }
+  })
+  .then(getLabels)
+  .then(labels => {
     classificationLabels = labels
     return getClassificationResultForHost(window.location.host, labels)
   }).then(results => {

@@ -5,12 +5,14 @@ const REMOVED_FEATURES_CACHE_KEY = "rm_feat"
 const PENDING_EXTRACTION_KEY = "pnd_extr"
 const FEED_READ_ITERATION_KEY = "feed_read_itr"
 const SEQUENCES_PENDING_EXTRACTION_KEY = "seq_pending_extr"
+const TIME_ON_SITE_KEY = "time_on_site"
 
 const classificationKey = host => `${CLASSIFICATION_CACHE_KEY}__${host}`
 const removedFeaturesKey = host => `${REMOVED_FEATURES_CACHE_KEY}__${host}`
 const pendingExtractionKey = host => `${PENDING_EXTRACTION_KEY}__${host}`
 const feedReadIterationKey = host => `${FEED_READ_ITERATION_KEY}__${host}`
 const sequencesPendingExtractionKey = host => `${SEQUENCES_PENDING_EXTRACTION_KEY}__${host}`
+const timeOnSiteKey = host => `${TIME_ON_SITE_KEY}__${host}`
 
 /**
  * Wrapper for chrome storage 
@@ -56,6 +58,17 @@ export const setHosts = hosts => set(HOSTS_CACHE_KEY, hosts)
 
 export const getFeedReadIteration = host => get(feedReadIterationKey(host), { iteration: 0 }).then(obj => obj.iteration)
 export const setFeedReadIteration = (host, iteration) => set(feedReadIterationKey(host), { iteration: iteration })
+
+export const getTimeSpentOnSiteTodaySeconds = host => get(timeOnSiteKey(host), { month: null, date: null, timeInSeconds: 0}).then(obj => {
+    const today = new Date()
+    if (obj.month === today.getMonth() && obj.date === today.getDate) {
+        return obj.timeInSeconds
+    } else {
+        return 0
+    }
+})
+
+export const setTimeSpendOnSiteTodaySeconds = (host, seconds) => set(timeOnSiteKey(host), { month: new Date().getMonth(), date: new Date().getDate(), timeInSeconds: seconds })
 
 export const getSequencesPendingExtraction = host => get(sequencesPendingExtractionKey(host), [])
 export const setSequencesPendingExtraction = (host, sequencesPendingExtraction) => set(sequencesPendingExtractionKey(host), sequencesPendingExtraction)

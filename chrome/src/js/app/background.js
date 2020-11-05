@@ -6,7 +6,8 @@ import {
 import {
 	CLASSIFIER_CONTENT_SCRIPT,
 	FEATURE_REMOVER_CONTENT_SCRIPT,
-	EXTRACTOR_CONTENT_SCRIPT
+	EXTRACTOR_CONTENT_SCRIPT,
+	TIMER_CONTENT_SCRIPT
 } from '../constants'
 
 import {
@@ -36,13 +37,18 @@ chrome.webNavigation.onDOMContentLoaded.addListener(function (details) {
 				chrome.tabs.executeScript(details.tabId, {
 					file: FEATURE_REMOVER_CONTENT_SCRIPT
 				})
+
+				chrome.tabs.executeScript(details.tabId, {
+					file: TIMER_CONTENT_SCRIPT
+				})
 			}
 		})
 	}
 })
 
+
 /* 
-	Feature extractor 
+	Feature remover 
 */
 chrome.contextMenus.create({
 	"id": "feature_remover",
