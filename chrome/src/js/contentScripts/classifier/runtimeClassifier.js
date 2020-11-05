@@ -54,7 +54,6 @@ var cache;
 var labels;
 
 (function () {
-  console.log("Running classifier")
   setupCache().then(() => {
     if (labels.length === 0) return
     const body = bodyNode()

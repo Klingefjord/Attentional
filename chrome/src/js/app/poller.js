@@ -23,13 +23,9 @@ const poll = async () => {
     const labels = await getLabels()
     const hosts = await getHosts()
 
-    console.log("Time to poll! Labels", labels, " hosts ", hosts)
-
     if (labels.length === 0 || hosts.length === 0) return
 
-    for (const host of hosts) {
-        sendRequest(host, labels).then(_ => console.log(`Got response from classifier for host ${host}`))
-    }
+    for (const host of hosts) sendRequest(host, labels)
 }
 
 const sendRequest = (host, labels) =>

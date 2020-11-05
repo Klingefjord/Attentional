@@ -37,7 +37,6 @@ export function render(node, classificationResults, classificationResultsOverrid
     matchedClassificationResults.forEach(classificationResult => {
         const passingThreshold = classificationResult.score >= OBSCURE_THRESHOLD
         const hide = override === null ? override : passingThreshold
-        console.log(classificationResult.score)
         if (hide) {
             reason = reasonString(node, classificationResult)
             shouldHide = true

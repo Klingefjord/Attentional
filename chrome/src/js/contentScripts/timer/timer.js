@@ -1,4 +1,7 @@
-const { setTimeSpendOnSiteTodaySeconds, getTimeSpentOnSiteTodaySeconds } = require("../../chromeStorage");
+import {
+    setTimeSpentOnSiteTodaySeconds,
+    getTimeSpentOnSiteTodaySeconds
+} from '../../chromeStorage'
 
 import {
     TIMER_INTERVAL_MILLIS
@@ -6,7 +9,7 @@ import {
 
 var timer;
 
-(function() {
+(function () {
     if (timer) clearInterval(timer)
     timer = setInterval(updateCache, TIMER_INTERVAL_MILLIS)
 })()
@@ -14,8 +17,9 @@ var timer;
 function updateCache() {
     if (!document.hidden) {
         const intervalSeconds = TIMER_INTERVAL_MILLIS / 1000
-        getTimeSpentOnSiteTodaySeconds(window.host).then(time => setTimeSpendOnSiteTodaySeconds(time + intervalSeconds))
-    } else {
-        console.log("Not updating timer, document is hidden")
+        const host = window.location.host
+        getTimeSpentOnSiteTodaySeconds(host).then(time => {
+            setTimeSpentOnSiteTodaySeconds(host, time + intervalSeconds)
+        })
     }
 }

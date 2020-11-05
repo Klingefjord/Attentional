@@ -126,8 +126,6 @@ function handleRemoveModal(msg, response) {
     document.getElementById('attn_granularity-modal-menu').remove()
   }
 
-  console.log(relevantNodes)
-
   bodyNode.insertBefore(modal(relevantNodes, finishCallback, cancelCallback), bodyNode.firstChild)
 }
 

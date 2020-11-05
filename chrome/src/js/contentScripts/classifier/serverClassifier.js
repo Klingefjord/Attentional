@@ -9,6 +9,7 @@ import {
 } from "./extractNodes"
 import {
   getLabels,
+  getTimeOnSiteAllowed,
   getTimeSpentOnSiteTodaySeconds
 } from '../../chromeStorage'
 import {
@@ -48,16 +49,16 @@ var classificationResultsOverrides = [];
   })
 })()
 
+async function pastTimeLimit() {
+  const host = window.location.host
+  return getTimeSpentOnSiteTodaySeconds(host).then(seconds => getTimeOnSiteAllowed(host).then(allowed => seconds > allowed))
+}
+
 async function setupClassificationResults() {
-  return getTimeSpentOnSiteTodaySeconds().then(seconds => {
-    if (seconds > 15) {
-      throw new Error("Time limit reached today, not fetching content")
-    }
-  })
-  .then(getLabels)
+  return getLabels()
   .then(labels => {
     classificationLabels = labels
-    return getClassificationResultForHost(window.location.host, labels)
+    return pastTimeLimit().then(pastTimeLimit => pastTimeLimit ? [] : getClassificationResultForHost(window.location.host, labels))
   }).then(results => {
     classificationResults = results
   })

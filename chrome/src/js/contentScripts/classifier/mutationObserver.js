@@ -42,11 +42,6 @@ export function registerMutationObserver(rootNode, addedNodesCallback, removedNo
         }
 
         if (removedArticles.length > 0) {
-          console.log("Removing article ", removedArticles)
-          if (removedArticles.some(a => a.innerText.includes("publishing."))) {
-            alert("Hooray")
-          }
-        
           if (removedNodesQueueCallback) removedNodesQueue.push(...removedArticles)
           if (removedNodesCallback) removedNodesCallback(removedArticles)
         }

@@ -1,5 +1,4 @@
 export const modal = (possibleNodes, finishCallback, cancelCallback) => {
-    console.log("Posssible nodes", possibleNodes)
     const modal = createModal()
     const modalContent = createModalContent()
     const slider = createSlider(possibleNodes)
