@@ -93,8 +93,23 @@ def content():
     body = request.json
     host = body['host']
     labels = body['labels']
-    results = [cr.to_dict() for cr in ClassificationResult.query.filter(ClassificationResult.host == host).all() if cr.label in labels]
+    results = [cr.to_dict() for cr in ClassificationResult.query.filter(ClassificationResult.host == host).all() if cr.label in labels and not cr.seen]
     return jsonify({ 'results': results })
+
+@app.route('/seen', methods=['POST'])
+def mark_as_seen():
+    """Mark a classification result as seen for a certain host"""
+    body = request.json
+    host = body['host']
+    labels = body['labels']
+    sequence_hashes = body['sequence_hashes']
+    for sequence_hash in sequence_hashes:
+        for cr in ClassificationResult.query.filter(ClassificationResult.host == host, ClassificationResult.sequence_hash == sequence_hash).all():
+            if cr.label in labels:
+                cr.seen = True
+    db.session.commit()
+    return jsonify({})
+
 
 if __name__ == '__main__':
     app.run(debug=True, threaded=True)

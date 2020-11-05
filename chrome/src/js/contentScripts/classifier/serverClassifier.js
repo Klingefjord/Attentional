@@ -14,15 +14,21 @@ import {
   registerMutationObserver
 } from './mutationObserver'
 import {
+  markSequenceAsSeen as markSequencesAsSeen,
   getClassificationResultForHost
 } from './classifierApi'
 import {
   render
 } from './renderer'
 
+import {
+  hashCode, textForClassification
+} from '../classifier/utils'
+
 /**
  * Global var, list of ClassificationResult from API
  */
+var classificationLabels;
 var classificationResults = [];
 var classificationResultsOverrides = [];
 
@@ -42,9 +48,12 @@ var classificationResultsOverrides = [];
 })()
 
 async function setupClassificationResults() {
-  return getLabels().then(labels => getClassificationResultForHost(window.location.host, labels).then(results => {
+  return getLabels().then(labels => {
+    classificationLabels = labels
+    return getClassificationResultForHost(window.location.host, labels)
+  }).then(results => {
     classificationResults = results
-  }))
+  })
 }
 
 function bodyNode() {
@@ -52,13 +61,15 @@ function bodyNode() {
 }
 
 function startListeningForDOMChanges(rootNode) {
-  registerMutationObserver(rootNode, false, nodes => {
+  const onNodesAdded = nodes => {
     let currentNodes = [...document.getElementsByClassName("attn_obscured_content")]
     nodes = nodes.filter(n => !currentNodes.some(cn => (n.contains(cn) || cn.contains(n)) && !n.isSameNode(cn)))
-    if (nodes.length > 0) {
-      nodes.forEach(node => render(node, classificationResults, classificationResultsOverrides))
-    }
-  }, null)
+    nodes.forEach(node => render(node, classificationResults, classificationResultsOverrides))   
+  }
+
+  const onNodesRemoved = nodes => markSequencesAsSeen(window.location.host, classificationLabels, nodes.map(hashCode))
+
+  registerMutationObserver(rootNode, onNodesAdded, null, null, onNodesRemoved)
 }
 
 // show/hide hidden content

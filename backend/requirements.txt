@@ -17,7 +17,7 @@ SQLAlchemy-serializer
 # ml
 numpy
 torch
-transformers
+transformers==3.0.1
 
 # Selenium
 bs4

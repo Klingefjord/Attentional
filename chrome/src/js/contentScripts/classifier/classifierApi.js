@@ -85,27 +85,17 @@ export async function getClassificationResultForHost(host, labels) {
         .then(body => body.results)
 }
 
-/**
- * 
- * @param response
- * {
- *   "results": [
- *     {
- *       "sequence_hash": string
- *       "score": float
- *       "host": string
- *       "label": string
- *     },
- *     { ... },
- *     ...
- *   ]
- * } 
- */
-// const setShouldHide = (response) =>
-//     response.results.map(result => {
-//         result.decision = {
-//             hide: result.score >= OBSCURE_THRESHOLD
-//         }
-
-//         return result
-//     })
+export async function markSequenceAsSeen(host, labels, sequenceHashes) {
+    return fetch(`${BASE_URL}/seen`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "Access-Control-Allow-Origin": "*",
+        },
+        body: JSON.stringify({
+            "host": host,
+            "labels": labels,
+            "sequence_hashes": sequenceHashes
+        })
+    }).then(response => response.json())
+}

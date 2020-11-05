@@ -4,41 +4,57 @@ import {
 } from './utils'
 
 // Global state
-var queue = []
+var addedNodesQueue = []
+var removedNodesQueue = []
 
-const QUEUE_INTERVALS = [100, 200, 500, 1000, 2000]
+const QUEUE_INTERVALS = [500, 1000, 2000]
 
 /**
  * Adds a mutation listener to the @param rootNode listening for addChildren events 
- * and adds valid text nodes to the global @var queue while hiding them. 
- * The @param callback is called according to @constant QUEUE_INTERVALS 
- * with nodes currently living in @var queue
+ * Either a removedNodesCallback or removedNodesQueueCallback has to passed to this method
+ * Either a addedNodesCallback or addedNodesQueueCallback has to be passed to this method
  */
-export function registerMutationObserver(rootNode, throttle, addedNodesCallback, queueActionCallback) {
+export function registerMutationObserver(rootNode, addedNodesCallback, removedNodesCallback, addedNodesQueueCallback, removedNodesQueueCallback) {
   const config = {
     attributes: false,
     childList: true,
     subtree: true
   }
 
-  if (throttle) registerUpdateQueue(queueActionCallback)
+  // Register queues if suitable callbacks exist
+  if (addedNodesQueueCallback) registerUpdateQueue(addedNodesQueueCallback, addedNodesQueue)
+  if (removedNodesQueueCallback) registerUpdateQueue(removedNodesQueueCallback, removedNodesQueue)
 
-  const observationHandler = (mutationsList, observer) => {
+  const observationHandler = (mutationsList, _) => {
     for (const mutation of mutationsList) {
-      if (mutation.type === 'childList' && mutation.addedNodes && mutation.addedNodes.length > 0) {
-        const articleNodes = [...mutation.addedNodes]
+      if (mutation.type === 'childList') {
+        const addedArticles = [...mutation.addedNodes]
           .filter(n => n.querySelector('article'))
           .map(n => n.querySelector('article'))
-        if (articleNodes.length === 0) {
-          [...mutation.addedNodes].filter(ignoreableNode)
-            .map(n => {
-              n.style.display = 'none'
-            })
-          continue
-        } else {
-          addedNodesCallback(articleNodes)
-          if (throttle) queue = queue.concat(articleNodes)
+
+        const removedArticles = [...mutation.removedNodes]
+          .filter(n => n.querySelector('article'))
+          .map(n => n.querySelector('article'))
+
+        if (addedArticles.length > 0) {
+          if (addedNodesQueueCallback) addedNodesQueue.push(...addedArticles)
+          if (addedNodesCallback) addedNodesCallback(addedArticles)
         }
+
+        if (removedArticles.length > 0) {
+          console.log("Removing article ", removedArticles)
+          if (removedArticles.some(a => a.innerText.includes("publishing."))) {
+            alert("Hooray")
+          }
+        
+          if (removedNodesQueueCallback) removedNodesQueue.push(...removedArticles)
+          if (removedNodesCallback) removedNodesCallback(removedArticles)
+        }
+
+        [...mutation.addedNodes].filter(ignoreableNode)
+          .map(n => {
+            n.style.display = 'none'
+          })
       }
     }
   }
@@ -49,20 +65,24 @@ export function registerMutationObserver(rootNode, throttle, addedNodesCallback,
   observer.observe(rootNode, config);
 }
 
-/// Queue (only enabled if throttling=True)
+/// Queue (only enabled if a relevant callback was passed when registering the mutation observer)
 const interval = updateIndex => updateIndex < QUEUE_INTERVALS.length ? QUEUE_INTERVALS[updateIndex] : QUEUE_INTERVALS[QUEUE_INTERVALS.length - 1]
 
-const registerUpdateQueue = updateNodes => {
-  updateQueue(0, updateNodes)
+const registerUpdateQueue = (callback, queue) => {
+  updateQueue(0, callback, queue)
 }
 
-const updateQueue = (updateIndex, updateNodes) => {
+const updateQueue = (index, callback, queue) => {
   setTimeout(() => {
-    console.log("Updating, queue is currently ", queue, " idx currently ", updateIndex)
-    const queueCopy = [...queue]
-    queue = []
-    updateNodes(queueCopy)
+    // Clear array without losing the reference and pass a copy instead
+    const copy = [...queue]
+    queue.length = 0
+
+    if (copy.length > 0) {
+      callback(copy)
+    }
+
     // Call this method recursively
-    updateQueue(++updateIndex, updateNodes)
-  }, interval(updateIndex))
+    updateQueue(++index, callback, queue)
+  }, interval(index))
 }

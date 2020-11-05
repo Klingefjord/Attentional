@@ -30,9 +30,6 @@ export function render(node, classificationResults, classificationResultsOverrid
         return
     }
 
-    // so - I hide a level underneath of what I am supposed to hide now all of a sudden
-    // how do I fix this?
-
     const override = classificationResultsOverrides.find(cr => cr.id === id)
     let shouldHide = false
     let reason = ""

@@ -30,11 +30,12 @@ class BaseModel(db.Model, SerializerMixin):
 class ClassificationResult(BaseModel):
     """The result after a classification"""
     __tablename__ = 'classification_result'
-    serialize_only=('label', 'score', 'sequence_hash', 'host')
+    serialize_only=('label', 'score', 'sequence_hash', 'host', 'seen')
     label = db.Column(db.String(), primary_key=True) #ForeignKey('label.name', ondelete='CASCADE'), primary_key=True)
     score = db.Column(db.Float())
     sequence_hash = db.Column(db.String(), primary_key=True)
     host = db.Column(db.String(), primary_key=True)#, ForeignKey('host.name', ondelete='CASCADE'))
+    seen = db.Column(db.Boolean(), default=False)
 
 # class Label(BaseModel):
 #     """Label unique to a user"""
