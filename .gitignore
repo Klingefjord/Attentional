@@ -11,3 +11,4 @@ backend/parser/__init__.py
 __pycache__
 /backend/migrations
 /backend/__pycache__/
+/backend/twitter/credentials.py
