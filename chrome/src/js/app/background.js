@@ -1,55 +1,19 @@
 import {
-	getHosts,
-	getPendingExtraction,
-	setPendingExtraction
-} from '../chromeStorage';
-import {
-	CLASSIFIER_CONTENT_SCRIPT,
-	FEATURE_REMOVER_CONTENT_SCRIPT,
-	EXTRACTOR_CONTENT_SCRIPT,
-	TIMER_CONTENT_SCRIPT
+	FEATURE_REMOVER_CONTENT_SCRIPT
 } from '../constants'
 
 import {
-	HOST_UPDATE,
-	REMOVE_MODAL,
-	REFRESH_HOSTS
+	REMOVE_MODAL
 } from "../messages";
-
 
 console.log("running background script")
 
 chrome.webNavigation.onDOMContentLoaded.addListener(function (details) {
-	if (/^https:\/\/twitter.com/.test(details.url)) {
-		const host = new URL(details.url).hostname
-		getPendingExtraction(host).then(pendingExtraction => {
-			if (pendingExtraction) {
-				setPendingExtraction(host, false).then(() => {
-					chrome.tabs.executeScript(details.tabId, {
-						file: EXTRACTOR_CONTENT_SCRIPT
-					})
-				})
-			} else {
-				chrome.tabs.executeScript(details.tabId, {
-					file: CLASSIFIER_CONTENT_SCRIPT
-				})
-
-				chrome.tabs.executeScript(details.tabId, {
-					file: FEATURE_REMOVER_CONTENT_SCRIPT
-				})
-
-				chrome.tabs.executeScript(details.tabId, {
-					file: TIMER_CONTENT_SCRIPT
-				})
-			}
-		})
-	}
+	chrome.tabs.executeScript(details.tabId, {
+		file: FEATURE_REMOVER_CONTENT_SCRIPT
+	})
 })
 
-
-/* 
-	Feature remover 
-*/
 chrome.contextMenus.create({
 	"id": "feature_remover",
 	"title": "Hide this feature",
@@ -64,21 +28,6 @@ chrome.contextMenus.onClicked.addListener(function (data, tab) {
 			const error = chrome.runtime.lastError;
 			if (error) reject(error)
 			resolve(response)
-		})
-	}
-})
-
-chrome.extension.onMessage.addListener((msg, sender, response) => {
-	if (msg.action === REFRESH_HOSTS) {
-		getHosts().then(hosts => {
-			hosts.forEach(host => {
-				setPendingExtraction(host, true).then(() => {
-					chrome.tabs.create({
-						url: `https://${host}/`,
-						active: false
-					}, tab => response(true))
-				})
-			})
 		})
 	}
 })
