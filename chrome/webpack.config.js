@@ -2,7 +2,7 @@ const webpack = require("webpack"),
     path = require("path"),
     fileSystem = require("fs"),
     env = require("./utils/env"),
-    baseManifest = require("./src/chrome/manifest.json"),
+    baseManifest = require("./public/manifest.json"),
     CleanWebpackPlugin = require("clean-webpack-plugin").CleanWebpackPlugin,
     CopyWebpackPlugin = require("copy-webpack-plugin"),
     HtmlWebpackPlugin = require("html-webpack-plugin"),
@@ -23,14 +23,10 @@ if (fileSystem.existsSync(secretsPath)) {
 var options = {
   mode: process.env.NODE_ENV || "development",
   entry: {
-    app: path.join(__dirname, "src", "static", "index.js"),	  
-    runtimeClassifier: path.join(__dirname, "src", "js", "contentScripts", "classifier", "runtimeClassifier.js"),
-    serverClassifier: path.join(__dirname, "src", "js", "contentScripts", "classifier", "serverClassifier.js"),
-    featureRemover: path.join(__dirname, "src", "js", "contentScripts", "featureRemover", "featureRemover.js"),
-    timer: path.join(__dirname, "src", "js", "contentScripts", "timer", "timer.js"),
-    extractor: path.join(__dirname, "src", "js", "contentScripts", "extractor", "extractor.js"),
-    options: path.join(__dirname, "src", "js", "app", "options.js"),
-    background: path.join(__dirname, "src", "js", "app", "background.js")
+    app: path.join(__dirname, "src", "index.js"),	  
+    featureRemover: path.join(__dirname, "src", "contentScripts", "featureRemover", "featureRemover.js"),
+    options: path.join(__dirname, "src", "optionScripts", "options.js"),
+    background: path.join(__dirname, "src", "backgroundScripts", "background.js")
   },
   //chromeExtensionBoilerplate: {
   //  notHotReload: ["fetchNodes", "classifier", "popup", "background"]
@@ -79,25 +75,25 @@ var options = {
         viewport: "width=device-width, initial-scale=1, shrink-to-fit=no",
         "theme-color": "#000000"
       },
-      manifest: "manifest.json",
+      manifest: "./public/manifest.json",
       filename: "index.html",
       chunks: ["app"],
-      template: "src/static/index.html",
+      template: "./public/index.html",
       hash: true
     }),
     new CopyWebpackPlugin({
       patterns: [{ 
-        from: "src/chrome/icons", 
+        from: "public/icons", 
         to: "icons" 
       }]
     }),
     new HtmlWebpackPlugin({
-      template: path.join(__dirname, "src", "static", "options.html"),
+      template: path.join(__dirname, "public", "options.html"),
       filename: "options.html",
       chunks: ["options"]
     }),
     new HtmlWebpackPlugin({
-      template: path.join(__dirname, "src", "static", "background.html"),
+      template: path.join(__dirname, "public", "background.html"),
       filename: "background.html",
       chunks: ["background"]
     }),

@@ -64,10 +64,7 @@ const createSlider = (possibleNodes) => {
     sliderContainer.appendChild(slider)
 
     slider.oninput = () => {
-        possibleNodes.forEach(n => {
-            n.style.display = ''
-        })
-
+        possibleNodes.forEach(n => n.style.display = '')
         const node = currentNode(slider.value, possibleNodes)
         if (node) node.style.display = 'none'
     }

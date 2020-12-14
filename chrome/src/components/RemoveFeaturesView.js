@@ -9,7 +9,7 @@ import {
   UNDO_REMOVED,
   SHOW_REMOVED,
   HIDE_REMOVED
-} from '../../messages'
+} from '../messages'
 
 const RemoveFeaturesView = props => {
   const [removedFeaturesList, setRemovedFeaturesList] = useState([])
