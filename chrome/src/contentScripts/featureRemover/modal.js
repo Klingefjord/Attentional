@@ -1,15 +1,15 @@
 export const modal = (possibleNodes, finishCallback, cancelCallback) => {
     const modal = createModal()
     const modalContent = createModalContent()
-    const slider = createSlider(possibleNodes)
-    const finishButton = createFinishButton(finishCallback, possibleNodes)
-    const cancelButton = createCancelButton(cancelCallback, possibleNodes)
 
-    modalContent.appendChild(slider)
-    modalContent.appendChild(finishButton)
-    modalContent.appendChild(cancelButton)
+    modalContent.appendChild(createHeader())
+    modalContent.appendChild(createSlider(possibleNodes))
+    modalContent.appendChild(createSeparator())
+    modalContent.appendChild(createFinishButton(finishCallback, possibleNodes))
+    modalContent.appendChild(createCancelButton(cancelCallback, possibleNodes))
     modal.appendChild(modalContent)
-    return modal;
+
+    return modal
 }
 
 const createModal = () => {
@@ -22,6 +22,19 @@ const createModalContent = () => {
     const modalContent = document.createElement('div')
     modalContent.setAttribute('id', 'attn__granularity-modal-content')
     return modalContent
+}
+
+const createHeader = () => {
+    const header = document.createElement('h2')
+    header.setAttribute('id', 'attn__granularity-modal-header')
+    header.innerHTML = "Keep sliding until things look good..."
+    return header
+}
+
+const createSeparator = () => {
+    const separator = document.createElement('div')
+    separator.setAttribute('id', 'attn__granularity-modal-separator')
+    return separator
 }
 
 const createSlider = (possibleNodes) => {
@@ -38,6 +51,7 @@ const createSlider = (possibleNodes) => {
     sliderContainer.appendChild(slider)
 
     slider.oninput = () => {
+        slider.style.background = 'linear-gradient(to right, #9C12F8 0%, #9C12F8 ' + slider.value + '%, #E2E2E2 ' + slider.value + '%, #E2E2E2 100%)'
         possibleNodes.forEach(n => n.style.display = '')
         const node = currentNode(slider.value, possibleNodes)
         if (node) node.style.display = 'none'
