@@ -93,6 +93,17 @@ var options = {
       chunks: ["options"]
     }),
     new HtmlWebpackPlugin({
+      template: path.join(__dirname, "public", "options.html"),
+      filename: "options.html",
+      chunks: ["options"]
+    }),
+    new CopyWebpackPlugin({
+      patterns: [{ 
+        from: "public/css",
+        to: "css"
+      }]
+    }),
+    new HtmlWebpackPlugin({
       template: path.join(__dirname, "public", "background.html"),
       filename: "background.html",
       chunks: ["background"]

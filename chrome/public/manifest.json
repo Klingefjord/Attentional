@@ -26,9 +26,10 @@
     "default_popup": "index.html",
     "default_icon": "icons/icon-32.png"
   },
-  "web_accessible_resources": [
-    "css/style.css"
-],
+  "content_scripts": [ {
+    "css": [ "css/slider.css" ],
+    "matches": [ "<all_urls>" ]
+  } ],
   "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'"
 }
 

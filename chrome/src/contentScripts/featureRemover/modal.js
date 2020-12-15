@@ -14,52 +14,26 @@ export const modal = (possibleNodes, finishCallback, cancelCallback) => {
 
 const createModal = () => {
     const modal = document.createElement('div')
-    modal.setAttribute('id', 'attn_granularity-modal-menu')
-    modal.classList.add('modal')
-    modal.style.cssText = `
-            margin: 0;
-            padding: 0;
-            display: block;
-            position: fixed;
-            z-index: 100000;
-            right: 0;
-            top: 0;
-            overflow: auto;
-            background-color: rgba(0,0,0, 0);
-            animation-name: modalopen;
-            animation-duration: 0.5s;`
-
+    modal.setAttribute('id', 'attn__granularity-modal-menu')
     return modal
 }
 
 const createModalContent = () => {
     const modalContent = document.createElement('div')
-    modalContent.classList.add('modal-content')
-    modalContent.style.cssText = `
-            background-color: #f4f4f4;
-            margin: 3vw;
-            position: relative;
-            float: right;
-            padding: 20px;
-            width: 20vw;
-            height: 5vh;
-            border-radius: 5px;`
-
+    modalContent.setAttribute('id', 'attn__granularity-modal-content')
     return modalContent
 }
 
 const createSlider = (possibleNodes) => {
     const sliderContainer = document.createElement('div')
-    sliderContainer.classList.add('slider-container')
-    sliderContainer.style.cssText = `margin: 0 auto;`
+    sliderContainer.setAttribute('id', 'attn__granularity-slider-container')
 
     const slider = document.createElement('input')
     slider.setAttribute('type', 'range')
     slider.setAttribute('min', '0')
     slider.setAttribute('max', '99')
     slider.setAttribute('value', '0')
-    slider.setAttribute('id', 'attn-slider')
-    slider.style.cssText = `width: 100%;`
+    slider.setAttribute('id', 'attn__granularity-slider')
 
     sliderContainer.appendChild(slider)
 
@@ -74,12 +48,11 @@ const createSlider = (possibleNodes) => {
 
 const createFinishButton = (finishCallback, possibleNodes) => {
     const button = document.createElement('button')
-    button.classList.add('finish-button')
-    button.style.cssText = `width: 100%`
+    button.setAttribute('id', 'attn__finish_button')
     button.innerHTML = "Remove element"
 
     button.onclick = _ => {
-        const slider = document.getElementById('attn-slider')
+        const slider = document.getElementById('attn__granularity_slider')
         finishCallback(currentNode(slider.value, possibleNodes))
     }
 
@@ -88,8 +61,7 @@ const createFinishButton = (finishCallback, possibleNodes) => {
 
 const createCancelButton = (cancelCallback, possibleNodes) => {
     const button = document.createElement('button')
-    button.classList.add('cancel-button')
-    button.style.cssText = `width: 100%;`
+    button.setAttribute('id', 'attn__cancel_button')
     button.innerHTML = "Cancel"
 
     button.onclick = _ => {

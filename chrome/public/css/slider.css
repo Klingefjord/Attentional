@@ -1,0 +1,36 @@
+#attn__granularity-modal-menu {
+    margin: 0;
+    padding: 0;
+    display: block;
+    position: fixed;
+    z-index: 100000;
+    right: 0;
+    top: 0;
+    overflow: auto;
+    background-color: rgba(0,0,0, 0);
+    animation-name: modalopen;
+    animation-duration: 0.5s;
+}
+
+#attn__granularity-modal-content {
+    background-color: #f4f4f4;
+    margin: 3vw;
+    position: relative;
+    float: right;
+    padding: 20px;
+    width: 20vw;
+    height: 5vh;
+    border-radius: 5px;
+}
+
+#attn__granularity-slider-container {
+    margin: 0 auto;   
+}
+
+#attn__granularity-slider {
+    width: 100%;
+}
+
+#attn__granularity-slider-container > button {
+    width: 100%;
+}
