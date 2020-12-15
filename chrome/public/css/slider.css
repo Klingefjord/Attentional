@@ -61,7 +61,7 @@
     box-shadow: 0px 1px 4px rgba(0, 0, 0, 0.25);
 }
 
-#attn__finish_button {
+#attn__granularity-finish-button {
     border: 0;
     width: 100%;
     background: linear-gradient(180deg, #9F09FB 0%, #9520F0 100%);
@@ -87,7 +87,7 @@
     margin-bottom: 25px;
 }
 
-#attn__cancel_button {
+#attn__granularity-cancel-button {
     border: 0;
     width: 100%;
     color: #9520F0;
@@ -96,8 +96,4 @@
     font-size: 18px;
     text-align: center;
     margin: 16px 0px;
-}
-
-#attn__granularity-slider-container > button {
-    width: 100%;
 }

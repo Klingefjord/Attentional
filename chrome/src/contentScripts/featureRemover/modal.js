@@ -1,3 +1,13 @@
+const 
+    MODAL_MENU_ID       = 'attn__granularity-modal-menu',
+    MODAL_CONTENT_ID    = 'attn__granularity-modal-content',
+    MODAL_HEADER_ID     = 'attn__granularity-modal-header',
+    MODAL_SEPARATOR_ID  = 'attn__granularity-modal-separator',
+    SLIDER_CONTAINER_ID = 'attn__granularity-slider-container',
+    SLIDER_ID           = 'attn__granularity-slider',
+    FINISH_BUTTON_ID    = 'attn__granularity-finish-button',
+    CANCEL_BUTTON_ID    = 'attn__granularity-cancel-button'
+
 export const modal = (possibleNodes, finishCallback, cancelCallback) => {
     const modal = createModal()
     const modalContent = createModalContent()
@@ -14,39 +24,39 @@ export const modal = (possibleNodes, finishCallback, cancelCallback) => {
 
 const createModal = () => {
     const modal = document.createElement('div')
-    modal.setAttribute('id', 'attn__granularity-modal-menu')
+    modal.setAttribute('id', MODAL_MENU_ID)
     return modal
 }
 
 const createModalContent = () => {
     const modalContent = document.createElement('div')
-    modalContent.setAttribute('id', 'attn__granularity-modal-content')
+    modalContent.setAttribute('id', MODAL_CONTENT_ID)
     return modalContent
 }
 
 const createHeader = () => {
     const header = document.createElement('h2')
-    header.setAttribute('id', 'attn__granularity-modal-header')
+    header.setAttribute('id', MODAL_HEADER_ID)
     header.innerHTML = "Keep sliding until things look good..."
     return header
 }
 
 const createSeparator = () => {
     const separator = document.createElement('div')
-    separator.setAttribute('id', 'attn__granularity-modal-separator')
+    separator.setAttribute('id', MODAL_SEPARATOR_ID)
     return separator
 }
 
 const createSlider = (possibleNodes) => {
     const sliderContainer = document.createElement('div')
-    sliderContainer.setAttribute('id', 'attn__granularity-slider-container')
+    sliderContainer.setAttribute('id', SLIDER_CONTAINER_ID)
 
     const slider = document.createElement('input')
     slider.setAttribute('type', 'range')
     slider.setAttribute('min', '0')
     slider.setAttribute('max', '99')
     slider.setAttribute('value', '0')
-    slider.setAttribute('id', 'attn__granularity-slider')
+    slider.setAttribute('id', SLIDER_ID)
 
     sliderContainer.appendChild(slider)
 
@@ -62,11 +72,12 @@ const createSlider = (possibleNodes) => {
 
 const createFinishButton = (finishCallback, possibleNodes) => {
     const button = document.createElement('button')
-    button.setAttribute('id', 'attn__finish_button')
+    button.setAttribute('id', FINISH_BUTTON_ID)
     button.innerHTML = "Remove element"
 
     button.onclick = _ => {
-        const slider = document.getElementById('attn__granularity_slider')
+        const slider = document.getElementById(SLIDER_ID)
+        document.getElementById(MODAL_MENU_ID).remove()
         finishCallback(currentNode(slider.value, possibleNodes))
     }
 
@@ -75,7 +86,7 @@ const createFinishButton = (finishCallback, possibleNodes) => {
 
 const createCancelButton = (cancelCallback, possibleNodes) => {
     const button = document.createElement('button')
-    button.setAttribute('id', 'attn__cancel_button')
+    button.setAttribute('id', CANCEL_BUTTON_ID)
     button.innerHTML = "Cancel"
 
     button.onclick = _ => {
@@ -83,6 +94,7 @@ const createCancelButton = (cancelCallback, possibleNodes) => {
             n.style.display = ''
         })
 
+        document.getElementById(MODAL_MENU_ID).remove()
         cancelCallback()
     }
 

@@ -117,13 +117,11 @@ function handleRemoveModal(msg, response) {
 
   const finishCallback = node => {
     removeElement(node)
-    document.getElementById('attn_granularity-modal-menu').remove()
     cache = [...cache, cssPath(node)]
     syncCache()
   }
 
   const cancelCallback = () => {
-    document.getElementById('attn_granularity-modal-menu').remove()
   }
 
   bodyNode.insertBefore(modal(relevantNodes, finishCallback, cancelCallback), bodyNode.firstChild)
