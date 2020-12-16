@@ -15,7 +15,7 @@
 }
 
 #attn__granularity-modal-content {
-    background-color: #f4f4f4;
+    background-color: #fff;
     box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.15);
     position: relative;
     float: right;
@@ -72,7 +72,7 @@
     padding: 16px 0px;
     border-radius: 15px;
     box-shadow: 0px 1px 10px 1px rgba(0, 0, 0, 0.25);
-    transition: box-shadow 0.3s ease-in-out;
+    transition: box-shadow 0.1s ease-in-out;
 }
 
 #attn__finish_button:hover, #attn__finish_button:focus {
@@ -99,13 +99,10 @@
 }
 
 #attn__sidebar {
-    width: 400px;
-    overflow-x: hidden;
-    background-color: #f4f4f4;
+    width: 500px;
+    height: 100vh;
     position: fixed;
-    right: 25px;
-    top: 25px;
-    border-radius: 20px;
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.15);
+    right: 0px;
+    top: 0px;
     z-index: 100000;
-  }
+}

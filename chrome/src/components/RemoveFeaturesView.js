@@ -11,6 +11,8 @@ import {
   HIDE_REMOVED
 } from '../messages'
 
+import RemovedFeatureRow from "./RemovedFeature";
+
 const RemoveFeaturesView = props => {
   const [removedFeaturesList, setRemovedFeaturesList] = useState([])
   const [loading, setLoading] = useState(true)
@@ -19,6 +21,7 @@ const RemoveFeaturesView = props => {
     const load = async () => {
       setLoading(true)
       const removedFeatures = await fetchRemovedFeatures()
+      console.log("remoced feature")
       setRemovedFeaturesList(removedFeatures)
       setLoading(false)
     }
@@ -39,26 +42,34 @@ const RemoveFeaturesView = props => {
 
   const fetchRemovedFeatures = async () => {
     return getActiveTabId().then(tabId => new Promise((resolve, reject) => {
+      console.log("fetch removed is " + FETCH_REMOVED)
       chrome.tabs.sendMessage(tabId, {
         action: FETCH_REMOVED
       }, response => {
         const error = chrome.runtime.lastError;
+        console.log("error in fetch", error)
+        console.log("response ", response)
         if (error) reject(error)
         resolve(response)
       })
     }))
   }
 
-  const toggleFeature = async (featureKey, action) => getActiveTabId().then(tabId => new Promise((resolve, reject) => {
+  const toggleFeature = async (selectorPath, show) => {
+    const action = show ? SHOW_REMOVED : HIDE_REMOVED
+
+    return getActiveTabId().then(tabId => new Promise((resolve, reject) => {
     chrome.tabs.sendMessage(tabId, {
       action: action,
-      key: featureKey
+      key: selectorPath
     }, response => {
       const error = chrome.runtime.lastError;
+      console.log("error in tggl", error)
       if (error) reject(error)
       resolve(response)
     })
   }))
+  }
 
   const undoRemove = async selectorPath => getActiveTabId()
     .then(tabId => new Promise((resolve, reject) => {
@@ -67,6 +78,7 @@ const RemoveFeaturesView = props => {
         key: selectorPath
       }, response => {
         const error = chrome.runtime.lastError;
+        console.log("error in undo", error)
         if (error) reject(error)
         resolve(response)
       })
@@ -76,22 +88,22 @@ const RemoveFeaturesView = props => {
 
   const renderEmpty = () => {
     return <div>
-      <h2>No hidden content for this page</h2>
-      <h3>To hide things, right-click anywhere on the site and click "hide".</h3>
+      <h2 style={{marginBottom: '16px'}}>No hidden content for this page</h2>
+      <p>To hide things, right-click anywhere on the site and click "hide".</p>
     </div>
   }
 
   const renderFromList = (list) => {
-    return list.map(removedFeature => 
-        <li 
-          key={removedFeature.selectorPath} 
-          onMouseEnter={_ => toggleFeature(removedFeature.selectorPath, SHOW_REMOVED)}
-          onMouseLeave={_ => toggleFeature(removedFeature.selectorPath, HIDE_REMOVED)}
-        >
-          <h2>{removedFeature.type}</h2>
-          <p>{removedFeature.content}</p>
-          <button onClick = {_ => undoRemove(removedFeature.selectorPath)}>Show</button>
-        </li>
+    return list.map((removedFeature, index) => 
+        <RemovedFeatureRow
+          includeSeparator={index !== list.length - 1}
+          key={removedFeature.selectorPath}
+          title={removedFeature.type}
+          text={removedFeature.content}
+          selectorPath={removedFeature.selectorPath}
+          onActivate={() => toggleFeature(removedFeature.selectorPath, true)} 
+          onDeactivate={() => toggleFeature(removedFeature.selectorPath, false)}
+          onShowClicked={() => undoRemove(removedFeature.selectorPath)} />
       )
   }
 

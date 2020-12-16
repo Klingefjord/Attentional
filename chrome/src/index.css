@@ -1,0 +1,81 @@
+* {
+    font-family: Roboto;
+    font-style: normal;
+    margin: 0px;
+    padding: 0px;
+}
+
+h2 {
+    font-weight: bold;
+    font-size: 24px;
+}
+
+ul {
+    list-style: none;
+}
+
+p {
+    font-size: 15px;
+    color: #828080;
+}
+
+.App {
+    min-height: 50px;
+    border-radius: 20px;
+    background-color: #f4f4f4;
+    margin: 25px;
+    padding: 25px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.15);
+}
+
+.RemovedFeaturesRow {
+    display: grid;
+    grid-template-columns: 4fr 1fr;
+}
+
+.removed-features-text-container {
+    display: grid;
+    grid-template-rows: 1fr 1fr;
+}
+
+button {
+    border: 0;
+    background: linear-gradient(180deg, #9F09FB 0%, #9520F0 100%);
+    color: white;
+    font-weight: bold;
+    text-align: center;
+    padding: 16px 0px;
+    border-radius: 15px;
+    box-shadow: 0px 1px 10px 1px rgba(0, 0, 0, 0.25);
+    transition: box-shadow 0.1s ease-in-out;  
+}
+
+.show-button {
+    width: 69px;
+    height: 32px;
+    padding: 0px;
+    border-radius: 8px;
+    font-size: 18px;
+}
+
+.show-button:hover {
+    background: linear-gradient(180deg, #9F09FB 0%, #9520F0 100%);
+    box-shadow: 0px 1px 20px 1px rgba(0, 0, 0, 0.35);
+}
+
+.show-button:disabled {
+    background: #E1E1E1;
+    color: #B1B0B0;
+}
+
+.disabled-header {
+    color: #828080;
+}
+
+.active-text {
+    color: #828080;
+}
+
+.disabled-text {
+    color: #C4C4C4
+}

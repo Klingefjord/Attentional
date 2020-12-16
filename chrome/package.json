@@ -39,6 +39,7 @@
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
     "react-input-slider": "^6.0.0",
+    "react-onclickoutside": "^6.9.0",
     "regenerator-runtime": "^0.13.7"
   }
 }

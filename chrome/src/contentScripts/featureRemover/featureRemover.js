@@ -19,6 +19,10 @@ import {
 } from "./utils";
 
 import {
+  SIDEBAR_ID
+} from '../../constants'
+
+import {
   modal
 } from './modal'
 
@@ -26,6 +30,7 @@ var cache;
 var selectedElement;
 
 (function () {
+  console.log("Running feature remover")
   setupCache()
     .then(hideElementsFromCache)
     .then(() => {
@@ -124,39 +129,52 @@ function handleRemoveModal(msg, response) {
   const cancelCallback = () => {
   }
 
+  alert("Removing sidebar from feature remover")
+  if (document.getElementById(SIDEBAR_ID)) {
+    document.getElementById(SIDEBAR_ID).remove()
+  }
+
   bodyNode.insertBefore(modal(relevantNodes, finishCallback, cancelCallback), bodyNode.firstChild)
 }
 
 function handleFetchRemoved(msg, response) {
+  console.log("Fetching removed")
   const displayInfo = selectorPath => {
     const element = document.querySelector(selectorPath)
     if (!element) return null
 
+    let text = new Set()
+    let ariaLabels = new Set()
+
     let obj = {
-      type: "Section",
-      content: "No caption",
-      selectorPath: selectorPath,  
+      selectorPath: selectorPath
     }
 
     for (const el of Array.from(element.getElementsByTagName('*'))) {
+      if (el.innerText && [...el.children].length === 0) text.add(el.innerText)
+      if (el.getAttribute('aria-label')) ariaLabels.add(el.getAttribute('aria-label'))
+
       if (el.tagName == "IMAGE") {
-        obj.type = "Image"
+        obj.type = "Image section"
         break
-      } else if (el.tagName == "BUTTON") {
-        obj.type = "Button"
+      } else if (el.tagName == "BUTTON" || el.getAttribute('role') === 'button') {
+        obj.type = "Button section"
         break
       }
     }
+
+    const textString = [...text].join(' ∙ ')
+    const ariaLabelString = [...ariaLabels].join(' ∙ ')
   
-    if (element.innerText) {
-      obj.type = "Text Section"
-      obj.content = element.innerText
-    }
+    if (!obj.type) obj.type = textString ? 'Text section' : 'Section'
+    if (!obj.content) obj.content = textString ? textString : ariaLabelString ? ariaLabelString : 'No caption'
   
     return obj
   }
 
-  response(cache.map(displayInfo).filter(e => e))
+  const removedFeatures = cache.map(displayInfo).filter(e => e)
+  console.log("removed feats", removedFeatures)
+  response(removedFeatures ? removedFeatures : [])
 }
 
 function handleUndoRemove(msg, response) {
@@ -201,6 +219,7 @@ chrome.extension.onMessage.addListener((msg, sender, response) => {
   } else if (msg.action === REMOVE_SELECTED) {
     handleElementRemoval(msg, response)
   } else if (msg.action === FETCH_REMOVED) {
+    console.log("got fetched removed message")
     handleFetchRemoved(msg, response)
   } else if (msg.action === UNDO_REMOVED) {
     handleUndoRemove(msg, response)

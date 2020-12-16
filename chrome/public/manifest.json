@@ -26,11 +26,11 @@
     "default_icon": "icons/icon-32.png"
   },
   "content_scripts": [{
-    "css": [ "css/slider.css" ],
+    "css": [ "css/main.css" ],
     "matches": [ "<all_urls>" ]
   }],
   "web_accessible_resources": [
-    "css/slider.css",
+    "css/main.css",
     "index.html"
   ],
   "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'"

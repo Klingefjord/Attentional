@@ -1,5 +1,6 @@
+export const MODAL_MENU_ID = 'attn__granularity-modal-menu'
+
 const 
-    MODAL_MENU_ID       = 'attn__granularity-modal-menu',
     MODAL_CONTENT_ID    = 'attn__granularity-modal-content',
     MODAL_HEADER_ID     = 'attn__granularity-modal-header',
     MODAL_SEPARATOR_ID  = 'attn__granularity-modal-separator',

@@ -25,7 +25,7 @@ chrome.browserAction.onClicked.addListener(function(details) {
 	chrome.tabs.executeScript(details.tabId, {
 		file: SIDEBAR_CONTENT_SCRIPT
 	})
-});
+})
 
 
 chrome.contextMenus.onClicked.addListener(function (data, tab) {
