@@ -128,18 +128,50 @@ function handleRemoveModal(msg, response) {
 }
 
 function handleFetchRemoved(msg, response) {
-  response(cache)
+  const displayInfo = selectorPath => {
+    const element = document.querySelector(selectorPath)
+    if (!element) return null
+
+    let obj = {
+      type: "Section",
+      content: "No caption",
+      selectorPath: selectorPath,  
+    }
+
+    for (const el of Array.from(element.getElementsByTagName('*'))) {
+      if (el.tagName == "IMAGE") {
+        obj.type = "Image"
+        break
+      } else if (el.tagName == "BUTTON") {
+        obj.type = "Button"
+        break
+      }
+    }
+  
+    if (element.innerText) {
+      obj.type = "Text Section"
+      obj.content = element.innerText
+    }
+  
+    return obj
+  }
+
+  response(cache.map(displayInfo).filter(e => e))
 }
 
 function handleUndoRemove(msg, response) {
   const index = cache.indexOf(msg.key)
   const element = document.querySelector(msg.key)
+
   if (index === -1 || !element) {
     response(false)
   } else {
     cache.splice(index, 1)
     element.style.display = ''
-    syncCache().then(() => response(true))
+    response(true)
+
+    // Make sure to update cache after updating it
+    syncCache()
   }
 }
 

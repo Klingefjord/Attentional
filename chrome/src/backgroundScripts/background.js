@@ -1,5 +1,6 @@
 import {
-	FEATURE_REMOVER_CONTENT_SCRIPT
+	FEATURE_REMOVER_CONTENT_SCRIPT,
+	SIDEBAR_CONTENT_SCRIPT
 } from '../constants'
 
 import {
@@ -19,6 +20,13 @@ chrome.contextMenus.create({
 	"title": "Hide this feature",
 	"contexts": ["all"]
 })
+
+chrome.browserAction.onClicked.addListener(function(details) { 
+	chrome.tabs.executeScript(details.tabId, {
+		file: SIDEBAR_CONTENT_SCRIPT
+	})
+});
+
 
 chrome.contextMenus.onClicked.addListener(function (data, tab) {
 	if (data.menuItemId === "feature_remover") {

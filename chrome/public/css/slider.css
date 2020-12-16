@@ -97,3 +97,15 @@
     text-align: center;
     margin: 16px 0px;
 }
+
+#attn__sidebar {
+    width: 400px;
+    overflow-x: hidden;
+    background-color: #f4f4f4;
+    position: fixed;
+    right: 25px;
+    top: 25px;
+    border-radius: 20px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.15);
+    z-index: 100000;
+  }

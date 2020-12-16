@@ -24,6 +24,7 @@ var options = {
   mode: process.env.NODE_ENV || "development",
   entry: {
     app: path.join(__dirname, "src", "index.js"),	  
+    sideBar: path.join(__dirname, "src", "contentScripts", "sidebar.js"),
     featureRemover: path.join(__dirname, "src", "contentScripts", "featureRemover", "featureRemover.js"),
     options: path.join(__dirname, "src", "optionScripts", "options.js"),
     background: path.join(__dirname, "src", "backgroundScripts", "background.js")

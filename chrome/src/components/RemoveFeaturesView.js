@@ -13,15 +13,18 @@ import {
 
 const RemoveFeaturesView = props => {
   const [removedFeaturesList, setRemovedFeaturesList] = useState([])
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     const load = async () => {
+      setLoading(true)
       const removedFeatures = await fetchRemovedFeatures()
       setRemovedFeaturesList(removedFeatures)
+      setLoading(false)
     }
 
     load()
-  })
+  }, [])
 
   const getActiveTabId = async () => new Promise((resolve, reject) => {
     chrome.tabs.query({
@@ -34,8 +37,8 @@ const RemoveFeaturesView = props => {
     })
   })
 
-  const fetchRemovedFeatures = async () =>
-    getActiveTabId().then(tabId => new Promise((resolve, reject) => {
+  const fetchRemovedFeatures = async () => {
+    return getActiveTabId().then(tabId => new Promise((resolve, reject) => {
       chrome.tabs.sendMessage(tabId, {
         action: FETCH_REMOVED
       }, response => {
@@ -44,6 +47,7 @@ const RemoveFeaturesView = props => {
         resolve(response)
       })
     }))
+  }
 
   const toggleFeature = async (featureKey, action) => getActiveTabId().then(tabId => new Promise((resolve, reject) => {
     chrome.tabs.sendMessage(tabId, {
@@ -56,11 +60,11 @@ const RemoveFeaturesView = props => {
     })
   }))
 
-  const undoRemove = async featureKey => getActiveTabId()
+  const undoRemove = async selectorPath => getActiveTabId()
     .then(tabId => new Promise((resolve, reject) => {
       chrome.tabs.sendMessage(tabId, {
         action: UNDO_REMOVED,
-        key: featureKey
+        key: selectorPath
       }, response => {
         const error = chrome.runtime.lastError;
         if (error) reject(error)
@@ -70,24 +74,37 @@ const RemoveFeaturesView = props => {
     .then(fetchRemovedFeatures)
     .then(setRemovedFeaturesList)
 
-  const renderRemovedFeature = removedFeature => {
-    return <li 
-      key={removedFeature} 
-      onMouseEnter={_ => toggleFeature(removedFeature, SHOW_REMOVED)}
-      onMouseLeave={_ => toggleFeature(removedFeature, HIDE_REMOVED)}
-    >
-      <h3>{removedFeature}</h3>
-      <button onClick = {_ => undoRemove(removedFeature)}>Don't hide this feature</button>
-    </li>
+  const renderEmpty = () => {
+    return <div>
+      <h2>No hidden content for this page</h2>
+      <h3>To hide things, right-click anywhere on the site and click "hide".</h3>
+    </div>
+  }
+
+  const renderFromList = (list) => {
+    return list.map(removedFeature => 
+        <li 
+          key={removedFeature.selectorPath} 
+          onMouseEnter={_ => toggleFeature(removedFeature.selectorPath, SHOW_REMOVED)}
+          onMouseLeave={_ => toggleFeature(removedFeature.selectorPath, HIDE_REMOVED)}
+        >
+          <h2>{removedFeature.type}</h2>
+          <p>{removedFeature.content}</p>
+          <button onClick = {_ => undoRemove(removedFeature.selectorPath)}>Show</button>
+        </li>
+      )
+  }
+
+  const renderLoading = () => {
+      // empty for now
   }
 
   return (
     <div>
-      <h1>RemoveFeaturesView</h1>
-      <p>To remove a feature, right click on it and press "Hide this feature"</p>
-      <p>Hidden features will be visible below. Hover over the name to view it.</p>
-      <ul>{removedFeaturesList.map(renderRemovedFeature)}</ul>
-    </div>
+    {
+      loading ? renderLoading() : removedFeaturesList.length === 0 ? renderEmpty() : <ul>{renderFromList(removedFeaturesList)}</ul>
+    }
+    </div>  
   )
 }
 
