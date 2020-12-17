@@ -46,7 +46,7 @@ button {
     text-align: center;
     padding: 16px 0px;
     border-radius: 15px;
-    box-shadow: 0px 1px 10px 1px rgba(0, 0, 0, 0.25);
+    box-shadow: 0px 1px 10px 1px rgba(0, 0, 0, 0.1);
     transition: box-shadow 0.1s ease-in-out;  
 }
 
@@ -60,12 +60,13 @@ button {
 
 .show-button:hover {
     background: linear-gradient(180deg, #9F09FB 0%, #9520F0 100%);
-    box-shadow: 0px 1px 20px 1px rgba(0, 0, 0, 0.35);
+    box-shadow: 0px 1px 20px 1px rgba(0, 0, 0, 0.15);
 }
 
 .show-button:disabled {
     background: #E1E1E1;
     color: #B1B0B0;
+    box-shadow: none;
 }
 
 .disabled-header {

@@ -1,5 +1,4 @@
 import {
-	FEATURE_REMOVER_CONTENT_SCRIPT,
 	SIDEBAR_CONTENT_SCRIPT
 } from '../constants'
 
@@ -7,15 +6,9 @@ import {
 	REMOVE_MODAL
 } from "../messages";
 
-chrome.webNavigation.onDOMContentLoaded.addListener(function (details) {
-	chrome.tabs.executeScript(details.tabId, {
-		file: FEATURE_REMOVER_CONTENT_SCRIPT
-	})
-})
-
 chrome.contextMenus.create({
 	"id": "feature_remover",
-	"title": "Hide this feature",
+	"title": "Hide",
 	"contexts": ["all"]
 })
 

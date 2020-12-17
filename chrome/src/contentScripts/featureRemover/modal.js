@@ -74,7 +74,7 @@ const createSlider = (possibleNodes) => {
 const createFinishButton = (finishCallback, possibleNodes) => {
     const button = document.createElement('button')
     button.setAttribute('id', FINISH_BUTTON_ID)
-    button.innerHTML = "Remove element"
+    button.innerHTML = "Hide"
 
     button.onclick = _ => {
         const slider = document.getElementById(SLIDER_ID)

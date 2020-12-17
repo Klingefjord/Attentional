@@ -84,7 +84,7 @@ const RemoveFeaturesView = props => {
   const renderEmpty = () => {
     return <div>
       <h2 style={{marginBottom: '16px'}}>No hidden content for this page</h2>
-      <p>To hide things, right-click anywhere on the site and click "hide".</p>
+      <p>All the content you have hidden for this page will appear here. To hide something, right-click anywhere on the site and select "Hide".</p>
     </div>
   }
 
