@@ -5,9 +5,7 @@
 	"manifest_version": 2,
 	"permissions": [
     "contextMenus",
-    "activeTab", 
-    "storage", 
-    "webNavigation",
+    "storage",
     "tabs",
     "http://*/",
     "https://*/"],
