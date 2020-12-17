@@ -7,8 +7,6 @@ import {
 	REMOVE_MODAL
 } from "../messages";
 
-console.log("running background script")
-
 chrome.webNavigation.onDOMContentLoaded.addListener(function (details) {
 	chrome.tabs.executeScript(details.tabId, {
 		file: FEATURE_REMOVER_CONTENT_SCRIPT

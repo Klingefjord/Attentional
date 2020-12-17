@@ -12,6 +12,7 @@ import {
 } from '../messages'
 
 import RemovedFeatureRow from "./RemovedFeature";
+import Separator from "./Separator";
 
 const RemoveFeaturesView = props => {
   const [removedFeaturesList, setRemovedFeaturesList] = useState([])
@@ -21,7 +22,6 @@ const RemoveFeaturesView = props => {
     const load = async () => {
       setLoading(true)
       const removedFeatures = await fetchRemovedFeatures()
-      console.log("remoced feature")
       setRemovedFeaturesList(removedFeatures)
       setLoading(false)
     }
@@ -42,13 +42,10 @@ const RemoveFeaturesView = props => {
 
   const fetchRemovedFeatures = async () => {
     return getActiveTabId().then(tabId => new Promise((resolve, reject) => {
-      console.log("fetch removed is " + FETCH_REMOVED)
       chrome.tabs.sendMessage(tabId, {
         action: FETCH_REMOVED
       }, response => {
         const error = chrome.runtime.lastError;
-        console.log("error in fetch", error)
-        console.log("response ", response)
         if (error) reject(error)
         resolve(response)
       })
@@ -64,7 +61,6 @@ const RemoveFeaturesView = props => {
       key: selectorPath
     }, response => {
       const error = chrome.runtime.lastError;
-      console.log("error in tggl", error)
       if (error) reject(error)
       resolve(response)
     })
@@ -78,7 +74,6 @@ const RemoveFeaturesView = props => {
         key: selectorPath
       }, response => {
         const error = chrome.runtime.lastError;
-        console.log("error in undo", error)
         if (error) reject(error)
         resolve(response)
       })
@@ -94,7 +89,7 @@ const RemoveFeaturesView = props => {
   }
 
   const renderFromList = (list) => {
-    return list.map((removedFeature, index) => 
+    const removedFeaturesRows = list.map((removedFeature, index) => 
         <RemovedFeatureRow
           includeSeparator={index !== list.length - 1}
           key={removedFeature.selectorPath}
@@ -105,6 +100,8 @@ const RemoveFeaturesView = props => {
           onDeactivate={() => toggleFeature(removedFeature.selectorPath, false)}
           onShowClicked={() => undoRemove(removedFeature.selectorPath)} />
       )
+
+    return <ul>{removedFeaturesRows}</ul>
   }
 
   const renderLoading = () => {
@@ -114,7 +111,7 @@ const RemoveFeaturesView = props => {
   return (
     <div>
     {
-      loading ? renderLoading() : removedFeaturesList.length === 0 ? renderEmpty() : <ul>{renderFromList(removedFeaturesList)}</ul>
+      loading ? renderLoading() : removedFeaturesList.length === 0 ? renderEmpty() : renderFromList(removedFeaturesList)
     }
     </div>  
   )

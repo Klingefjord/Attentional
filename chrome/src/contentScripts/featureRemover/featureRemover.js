@@ -30,7 +30,6 @@ var cache;
 var selectedElement;
 
 (function () {
-  console.log("Running feature remover")
   setupCache()
     .then(hideElementsFromCache)
     .then(() => {
@@ -112,7 +111,7 @@ function handleRemoveModal(msg, response) {
   const addParentRecursively = node => {
     if (node.parentElement 
     && !bodyNode.isSameNode(node.parentElement)
-    && relevantNodes.length < 10) {
+    && relevantNodes.length < 20) {
       relevantNodes.push(node.parentElement)
       addParentRecursively(node.parentElement)
     }
@@ -129,7 +128,6 @@ function handleRemoveModal(msg, response) {
   const cancelCallback = () => {
   }
 
-  alert("Removing sidebar from feature remover")
   if (document.getElementById(SIDEBAR_ID)) {
     document.getElementById(SIDEBAR_ID).remove()
   }
@@ -138,7 +136,6 @@ function handleRemoveModal(msg, response) {
 }
 
 function handleFetchRemoved(msg, response) {
-  console.log("Fetching removed")
   const displayInfo = selectorPath => {
     const element = document.querySelector(selectorPath)
     if (!element) return null
@@ -173,7 +170,6 @@ function handleFetchRemoved(msg, response) {
   }
 
   const removedFeatures = cache.map(displayInfo).filter(e => e)
-  console.log("removed feats", removedFeatures)
   response(removedFeatures ? removedFeatures : [])
 }
 
@@ -219,7 +215,6 @@ chrome.extension.onMessage.addListener((msg, sender, response) => {
   } else if (msg.action === REMOVE_SELECTED) {
     handleElementRemoval(msg, response)
   } else if (msg.action === FETCH_REMOVED) {
-    console.log("got fetched removed message")
     handleFetchRemoved(msg, response)
   } else if (msg.action === UNDO_REMOVED) {
     handleUndoRemove(msg, response)

@@ -7,8 +7,6 @@ import {
 } from '../constants'
 
 (function() {
-    console.log("Running sidebar script")
-
     const sidebar = document.getElementById(SIDEBAR_ID)
 
     if (sidebar) {
