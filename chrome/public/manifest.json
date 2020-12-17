@@ -12,10 +12,11 @@
     "http://*/",
     "https://*/"],
     "icons": {
-      "16": "icons/icon-16.png",
-      "32": "icons/icon-32.png",
-      "48": "icons/icon-48.png",
-      "128": "icons/icon-128.png"
+      "16": "icons/logo-16.png",
+      "32": "icons/logo-32.png",
+      "48": "icons/logo-48.png",
+      "64": "icons/logo-64.png",
+      "128": "icons/logo-128.png"
     },
 	"options_page": "options.html",
 	"background": {  
@@ -23,7 +24,7 @@
     "persistent": false
   },
   "browser_action": {
-    "default_icon": "icons/icon-32.png"
+    "default_icon": "icons/logo-48.png"
   },
   "content_scripts": [{
     "css": [ "css/main.css" ],
