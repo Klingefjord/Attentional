@@ -1,6 +1,6 @@
 import {
     MODAL_MENU_ID
-} from './featureRemover/modal'
+} from './modal'
 
 import {
     SIDEBAR_ID

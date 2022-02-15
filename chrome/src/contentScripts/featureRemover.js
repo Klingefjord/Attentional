@@ -7,12 +7,12 @@ import {
   SHOW_REMOVED,
   HIDE_REMOVED,
   REMOVE_MODAL
-} from '../../messages';
+} from '../messages';
 
 import {
   getRemovedFeatures,
   setRemovedFeatures
-} from '../../chromeStorage'
+} from '../chromeStorage'
 
 import {
   cssPath
@@ -20,7 +20,7 @@ import {
 
 import {
   SIDEBAR_ID
-} from '../../constants'
+} from '../constants'
 
 import {
   modal
