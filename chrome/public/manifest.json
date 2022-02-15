@@ -6,7 +6,7 @@
 	"permissions": [
     "contextMenus",
     "storage",
-    "tabs",
+    "activeTab",
     "http://*/",
     "https://*/"],
     "icons": {
