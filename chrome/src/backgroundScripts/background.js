@@ -13,7 +13,7 @@ chrome.contextMenus.create({
 })
 
 chrome.browserAction.onClicked.addListener(function(details) { 
-	chrome.tabs.executeScript(details.tabId, {
+	chrome.scripting.executeScript(details.tabId, {
 		file: SIDEBAR_CONTENT_SCRIPT
 	})
 })

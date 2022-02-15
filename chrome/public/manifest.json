@@ -2,13 +2,15 @@
 	"name": "Attentional",    
 	"version": "0.0.0.1",    
 	"description": "Control your attention by hiding distracting elements.",    
-	"manifest_version": 2,
+	"manifest_version": 3,
 	"permissions": [
     "contextMenus",
     "storage",
-    "activeTab",
+    "activeTab"],
+  "host_permissions": [
     "http://*/",
-    "https://*/"],
+    "https://*/"
+  ],
     "icons": {
       "16": "icons/logo-16.png",
       "32": "icons/logo-32.png",
@@ -21,7 +23,7 @@
     "page": "background.html",
     "persistent": false
   },
-  "browser_action": {
+  "action": {
     "default_icon": "icons/logo-48.png"
   },
   "content_scripts": [{
@@ -29,10 +31,13 @@
     "matches": [ "<all_urls>" ],
     "js": ["featureRemover.bundle.js"]
   }],
-  "web_accessible_resources": [
-    "css/main.css",
-    "index.html"
-  ],
+  "web_accessible_resources": [{
+    "resources": [
+      "css/main.css",
+      "index.html"
+
+    ]
+  }],
   "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'"
 }
 

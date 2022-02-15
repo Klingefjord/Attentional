@@ -11,7 +11,7 @@ const App = props => {
       active: true,
       currentWindow: true
     }, tabs => {
-      chrome.tabs.executeScript(tabs[0].id, {
+      chrome.scripting.executeScript(tabs[0].id, {
         file: SIDEBAR_CONTENT_SCRIPT
       })
     })
