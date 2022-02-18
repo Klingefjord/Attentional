@@ -7,6 +7,8 @@ import {
 } from '../constants'
 
 (function() {
+    console.log("Sidebarawd!")
+
     const sidebar = document.getElementById(SIDEBAR_ID)
 
     if (sidebar) {
@@ -18,7 +20,7 @@ import {
         const body = document.getElementsByTagName("body")[0]
         const container = document.createElement('div')
         container.setAttribute('id', SIDEBAR_ID)
-        container.innerHTML=`<object type="text/html" data="${chrome.extension.getURL('/index.html')}" style="width: 100%; height: 100%;"></object>`
+        container.innerHTML=`<object type="text/html" data="${chrome.runtime.getURL('/index.html')}" style="width: 100%; height: 100%;"></object>`
         body.insertBefore(container, body.firstChild)
     }
 })()

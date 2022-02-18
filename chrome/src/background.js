@@ -1,10 +1,10 @@
 import {
 	SIDEBAR_CONTENT_SCRIPT
-} from '../constants'
+} from './constants'
 
 import {
 	REMOVE_MODAL
-} from "../messages";
+} from "./messages";
 
 chrome.contextMenus.create({
 	"id": "feature_remover",
@@ -12,9 +12,14 @@ chrome.contextMenus.create({
 	"contexts": ["all"]
 })
 
-chrome.browserAction.onClicked.addListener(function(details) { 
-	chrome.scripting.executeScript(details.tabId, {
-		file: SIDEBAR_CONTENT_SCRIPT
+chrome.action.onClicked.addListener(function(tab) { 
+	chrome.scripting.executeScript({
+		target: {
+			tabId: tab.id
+		},
+		files: [
+			SIDEBAR_CONTENT_SCRIPT,
+		]
 	})
 })
 

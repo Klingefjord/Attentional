@@ -24,10 +24,10 @@ var options = {
   mode: process.env.NODE_ENV || "development",
   entry: {
     app: path.join(__dirname, "src", "index.js"),	  
-    sideBar: path.join(__dirname, "src", "contentScripts", "sidebar.js"),
-    featureRemover: path.join(__dirname, "src", "contentScripts", "featureRemover", "featureRemover.js"),
-    options: path.join(__dirname, "src", "optionScripts", "options.js"),
-    background: path.join(__dirname, "src", "backgroundScripts", "background.js")
+    sideBar: path.join(__dirname, "src", "contentScripts", "sideBar.js"),
+    featureRemover: path.join(__dirname, "src", "contentScripts", "featureRemover.js"),
+    // options: path.join(__dirname, "src", "optionScripts", "options.js"),
+    background: path.join(__dirname, "src", "background.js")
   },
   //chromeExtensionBoilerplate: {
   //  notHotReload: ["fetchNodes", "classifier", "popup", "background"]
@@ -67,6 +67,7 @@ var options = {
   plugins: [
     // clean the build folder
     new CleanWebpackPlugin(),
+
     // expose and write the allowed env vars on the compiled bundle
     new webpack.EnvironmentPlugin(["NODE_ENV"]),
     new HtmlWebpackPlugin({
@@ -93,21 +94,11 @@ var options = {
       filename: "options.html",
       chunks: ["options"]
     }),
-    new HtmlWebpackPlugin({
-      template: path.join(__dirname, "public", "options.html"),
-      filename: "options.html",
-      chunks: ["options"]
-    }),
     new CopyWebpackPlugin({
       patterns: [{ 
         from: "public/css",
         to: "css"
       }]
-    }),
-    new HtmlWebpackPlugin({
-      template: path.join(__dirname, "public", "background.html"),
-      filename: "background.html",
-      chunks: ["background"]
     }),
     new WebpackExtensionManifestPlugin({
       config: {
@@ -115,11 +106,8 @@ var options = {
       }
     }),
     new WriteFilePlugin()
-  ]
+  ],
+  devtool: "source-map"
 };
-
-if (env.NODE_ENV === "development") {
-  options.devtool = "cheap-module-eval-source-map";
-}
 
 module.exports = options;

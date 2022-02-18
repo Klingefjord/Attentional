@@ -4,9 +4,11 @@
 	"description": "Control your attention by hiding distracting elements.",    
 	"manifest_version": 3,
 	"permissions": [
+    "scripting",
     "contextMenus",
     "storage",
-    "activeTab"],
+    "activeTab"
+  ],
   "host_permissions": [
     "http://*/",
     "https://*/"
@@ -20,8 +22,7 @@
     },
 	"options_page": "options.html",
 	"background": {  
-    "page": "background.html",
-    "persistent": false
+    "service_worker": "background.bundle.js"
   },
   "action": {
     "default_icon": "icons/logo-48.png"
@@ -29,15 +30,20 @@
   "content_scripts": [{
     "css": [ "css/main.css" ],
     "matches": [ "<all_urls>" ],
-    "js": ["featureRemover.bundle.js"]
+    "js": [
+      "featureRemover.bundle.js"
+    ]
   }],
   "web_accessible_resources": [{
     "resources": [
       "css/main.css",
       "index.html"
 
-    ]
+    ],
+    "matches": ["<all_urls>"]
   }],
-  "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'"
+  "content_security_policy": {
+    "script-src": "self",
+    "object-src":  "self"
+  }
 }
-

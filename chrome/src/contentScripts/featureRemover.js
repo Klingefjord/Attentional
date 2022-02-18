@@ -209,7 +209,7 @@ function handleHideRemoved(msg, response) {
   }
 }
 
-chrome.extension.onMessage.addListener((msg, sender, response) => {
+chrome.runtime.onMessage.addListener((msg, sender, response) => {
   if (msg.action === REMOVE_MODAL) {
     handleRemoveModal(msg, response)
   } else if (msg.action === REMOVE_SELECTED) {
