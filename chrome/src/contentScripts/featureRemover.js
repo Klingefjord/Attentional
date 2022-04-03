@@ -51,7 +51,7 @@ function removeElement(element) {
   if (!element) {
     return
   }
-  
+
   element.style.display = 'none'
 }
 
@@ -189,7 +189,9 @@ function handleUndoRemove(msg, response) {
 
 function handleShowRemoved(msg, response) {
   isHovering = true
+
   const element = document.querySelector(msg.key)
+
   if (!element) {
     response(false)
   } else {
@@ -200,7 +202,9 @@ function handleShowRemoved(msg, response) {
 
 function handleHideRemoved(msg, response) {
   isHovering = false
+  
   const element = document.querySelector(msg.key)
+
   if (!element) {
     response(false)
   } else {

@@ -96,7 +96,17 @@ const createFinishButton = (finishCallback, possibleNodes) => {
     button.onclick = _ => {
         const slider = document.getElementById(SLIDER_ID)
         document.getElementById(MODAL_MENU_ID).remove()
-        finishCallback(currentNode(slider.value, possibleNodes))
+
+        // Get the current node.
+        const current = currentNode(slider.value, possibleNodes)
+
+        // Show other nodes that might have been hidden while sliding.
+        for (const possibleNode of possibleNodes) {
+            possibleNode.style.display = ''
+        }
+
+        // Call the callback.
+        finishCallback(current)
     }
 
     return button
