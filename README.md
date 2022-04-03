@@ -1,5 +1,16 @@
-# attentional - eraser
-A tool for directing your attention
+# Attentional – Hide distracting content
 
-TODO:
-[] https://developer.chrome.com/docs/extensions/mv3/migrating_to_service_workers/
+Hide distracting content.
+
+## Run
+1. Install [yarn](https://yarnpkg.com/lang/en/docs/install/).
+2. Run `yarn`.
+3. Run `yarn run start`
+4. Load your extension on Chrome following:
+    1. Access `chrome://extensions/`
+    2. Check `Developer mode`
+    3. Click on `Load unpacked extension`
+    4. Select the `build` folder.
+
+## Upload
+https://support.google.com/chrome/a/answer/2714278?hl=en

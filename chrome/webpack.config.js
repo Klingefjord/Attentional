@@ -26,12 +26,8 @@ var options = {
     app: path.join(__dirname, "src", "index.js"),	  
     sideBar: path.join(__dirname, "src", "contentScripts", "sideBar.js"),
     featureRemover: path.join(__dirname, "src", "contentScripts", "featureRemover.js"),
-    // options: path.join(__dirname, "src", "optionScripts", "options.js"),
     background: path.join(__dirname, "src", "background.js")
   },
-  //chromeExtensionBoilerplate: {
-  //  notHotReload: ["fetchNodes", "classifier", "popup", "background"]
-  //},
   output: {
     path: path.join(__dirname, "build"),
     filename: "[name].bundle.js"
@@ -71,7 +67,7 @@ var options = {
     // expose and write the allowed env vars on the compiled bundle
     new webpack.EnvironmentPlugin(["NODE_ENV"]),
     new HtmlWebpackPlugin({
-      title: "Attentional",
+      title: "Attentional – Hide distracting content",
       meta: {
         charset: "utf-8",
         viewport: "width=device-width, initial-scale=1, shrink-to-fit=no",
