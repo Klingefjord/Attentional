@@ -1,6 +1,6 @@
 {    
 	"name": "Attentional – Hide distracting content",    
-	"version": "0.0.0.1",    
+	"version": "0.0.1.0",    
 	"description": "Hide distracting content.",    
 	"manifest_version": 3,
 	"permissions": [
