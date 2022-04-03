@@ -33,6 +33,11 @@ p {
     grid-template-columns: 4fr 1fr;
 }
 
+.RemovedFeaturesRow:hover {
+    pointer-events: auto;
+    cursor: pointer;
+}
+
 .removed-features-text-container {
     display: grid;
     grid-template-rows: 1fr 1fr;
@@ -48,6 +53,11 @@ button {
     border-radius: 15px;
     box-shadow: 0px 1px 10px 1px rgba(0, 0, 0, 0.1);
     transition: box-shadow 0.1s ease-in-out;  
+}
+
+button:hover {
+    pointer-events: auto;
+    cursor: pointer;
 }
 
 .show-button {
