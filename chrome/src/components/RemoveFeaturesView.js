@@ -9,7 +9,7 @@ import {
   UNDO_REMOVED,
   SHOW_REMOVED,
   HIDE_REMOVED
-} from '../messages'
+} from '../constants'
 
 import RemovedFeatureRow from "./RemovedFeature";
 import Separator from "./Separator";

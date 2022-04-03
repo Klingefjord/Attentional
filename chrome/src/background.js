@@ -1,10 +1,7 @@
 import {
-	SIDEBAR_CONTENT_SCRIPT
-} from './constants'
-
-import {
+	SIDEBAR_CONTENT_SCRIPT,
 	REMOVE_MODAL
-} from "./messages";
+} from './constants'
 
 chrome.contextMenus.create({
 	"id": "feature_remover",

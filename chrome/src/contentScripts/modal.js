@@ -48,6 +48,8 @@ const createSeparator = () => {
     return separator
 }
 
+let previousInput = 0
+
 const createSlider = (possibleNodes) => {
     const sliderContainer = document.createElement('div')
     sliderContainer.setAttribute('id', SLIDER_CONTAINER_ID)
@@ -62,10 +64,25 @@ const createSlider = (possibleNodes) => {
     sliderContainer.appendChild(slider)
 
     slider.oninput = () => {
+        const input = slider.value
+
         slider.style.background = 'linear-gradient(to right, #9C12F8 0%, #9C12F8 ' + slider.value + '%, #E2E2E2 ' + slider.value + '%, #E2E2E2 100%)'
-        possibleNodes.forEach(n => n.style.display = '')
+
         const node = currentNode(slider.value, possibleNodes)
-        if (node) node.style.display = 'none'
+
+        if (node) {
+            // Sliding left.
+            if (input < previousInput || input == 0) {
+                fadeIn(node)
+            }
+
+            // Sliding right.
+            if (input > previousInput || input == 100) {
+                fadeOut(node)
+            }
+        }
+
+        previousInput = input;
     }
 
     return sliderContainer
@@ -92,7 +109,9 @@ const createCancelButton = (cancelCallback, possibleNodes) => {
 
     button.onclick = _ => {
         possibleNodes.forEach(n => {
-            n.style.display = ''
+            if (n) {
+                fadeIn(n)
+            }
         })
 
         document.getElementById(MODAL_MENU_ID).remove()
@@ -108,3 +127,11 @@ const currentNode = (sliderValue, possibleNodes) => {
 }
 
 const normalize = (value, x, y) => value * x / y;
+
+const fadeIn = (node) => {
+    node.style.display = ''
+}
+
+const fadeOut = (node) => {
+    node.style.display = 'none'
+}

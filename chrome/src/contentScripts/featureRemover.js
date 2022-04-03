@@ -1,15 +1,6 @@
 import regeneratorRuntime from "regenerator-runtime";
 
 import {
-  REMOVE_SELECTED,
-  FETCH_REMOVED,
-  UNDO_REMOVED,
-  SHOW_REMOVED,
-  HIDE_REMOVED,
-  REMOVE_MODAL
-} from '../messages';
-
-import {
   getRemovedFeatures,
   setRemovedFeatures
 } from '../chromeStorage'
@@ -19,7 +10,13 @@ import {
 } from "./utils";
 
 import {
-  SIDEBAR_ID
+  SIDEBAR_ID,
+  REMOVE_SELECTED,
+  FETCH_REMOVED,
+  UNDO_REMOVED,
+  SHOW_REMOVED,
+  HIDE_REMOVED,
+  REMOVE_MODAL
 } from '../constants'
 
 import {
@@ -51,7 +48,10 @@ async function hideElementsFromCache() {
 }
 
 function removeElement(element) {
-  if (!element) return
+  if (!element) {
+    return
+  }
+  
   element.style.display = 'none'
 }
 
