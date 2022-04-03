@@ -152,7 +152,7 @@ function handleFetchRemoved(msg, response) {
       if (el.tagName == "IMAGE") {
         obj.type = "Image section"
         break
-      } else if (el.tagName == "BUTTON" || el.getAttribute('role') === 'button') {
+      } else if (el.tagName == "BUTTON" || el.getAttribute('role') === 'button') {
         obj.type = "Button section"
         break
       }

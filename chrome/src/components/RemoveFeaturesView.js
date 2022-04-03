@@ -17,6 +17,7 @@ import Separator from "./Separator";
 const RemoveFeaturesView = props => {
   const [removedFeaturesList, setRemovedFeaturesList] = useState([])
   const [loading, setLoading] = useState(true)
+  const [temporarilyShownFeatures, setTemporarilyShownFeatures] = useState([])
 
   useEffect(() => {
     const load = async () => {
@@ -67,6 +68,17 @@ const RemoveFeaturesView = props => {
   }))
   }
 
+  const onRowClicked = async (selectorPath, isShown) => {
+    if (isShown) {
+      const filtered = temporarilyShownFeatures.filter(f => f !== selectorPath)
+      setTemporarilyShownFeatures(filtered)
+    } else {
+      setTemporarilyShownFeatures([...temporarilyShownFeatures, selectorPath])
+    }
+
+    toggleFeature(selectorPath, true)
+  }
+
   const undoRemove = async selectorPath => getActiveTabId()
     .then(tabId => new Promise((resolve, reject) => {
       chrome.tabs.sendMessage(tabId, {
@@ -84,28 +96,36 @@ const RemoveFeaturesView = props => {
   const renderEmpty = () => {
     return <div>
       <h2 style={{marginBottom: '16px'}}>No hidden content for this page</h2>
-      <p>All the content you have hidden for this page will appear here. To hide something, right-click anywhere on the site and select "Hide".</p>
+      <p>All the content you have hidden for this page will appear here.
+        
+        To hide something, right-click anywhere on the site and select "Hide".</p>
     </div>
   }
 
   const renderFromList = (list) => {
-    const removedFeaturesRows = list.map((removedFeature, index) => 
-        <RemovedFeatureRow
-          includeSeparator={index !== list.length - 1}
-          key={removedFeature.selectorPath}
-          title={removedFeature.type}
-          text={removedFeature.content}
-          selectorPath={removedFeature.selectorPath}
-          onActivate={() => toggleFeature(removedFeature.selectorPath, true)} 
-          onDeactivate={() => toggleFeature(removedFeature.selectorPath, false)}
-          onShowClicked={() => undoRemove(removedFeature.selectorPath)} />
-      )
+
+    const removedFeaturesRows = list.map((removedFeature, index) => {
+      const temporarilyShown = temporarilyShownFeatures.includes(removedFeature.selectorPath)
+
+      return <RemovedFeatureRow
+        includeSeparator={index !== list.length - 1}
+        key={removedFeature.selectorPath}
+        title={removedFeature.type}
+        text={removedFeature.content}
+        selectorPath={removedFeature.selectorPath}
+        temporarilyShown={temporarilyShown}
+        onActivate={() => toggleFeature(removedFeature.selectorPath, true)} 
+        onDeactivate={() => toggleFeature(removedFeature.selectorPath, false)}
+        onRowClicked={() => onRowClicked(removedFeature.selectorPath, temporarilyShown)}
+        onShowClicked={() => undoRemove(removedFeature.selectorPath)} 
+      />
+    })
 
     return <ul>{removedFeaturesRows}</ul>
   }
 
   const renderLoading = () => {
-      // empty for now
+    // empty for now
   }
 
   return (

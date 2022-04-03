@@ -75,9 +75,12 @@
     transition: box-shadow 0.1s ease-in-out;
 }
 
-#attn__finish_button:hover, #attn__finish_button:focus {
-    background: linear-gradient(180deg, #9F09FB 0%, #9520F0 100%);
-    box-shadow: 0px 1px 20px 1px rgba(0, 0, 0, 0.15);
+#attn__granularity-finish-button:hover {
+    filter: brightness(90%);
+}
+
+#attn__granularity-finish-button:focus {
+    filter: brightness(85%);
 }
 
 #attn__granularity-modal-header {
